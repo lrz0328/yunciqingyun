@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青韵工坊 · 作品排行榜</title>
+    <style>
+        /* ========== 全局重置与变量 ========== */
+        :root {
+            --q-blue: #003366;
+            --q-light: #e6f0ff;
+            --q-border: #b3cde0;
+            --bg-body: #fcfcfc;
+            --text-main: #333;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 70px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========== 顶部导航栏 ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            border-bottom: 2px solid var(--q-blue);
+            box-shadow: 0 2px 10px rgba(0, 51, 102, 0.05);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--q-blue);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--q-blue);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "KaiTi", serif;
+            font-size: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--q-blue);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--q-blue);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .nav-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--q-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--q-border);
+        }
+
+        /* ========== 页面头部 ========== */
+        .page-header {
+            background: linear-gradient(135deg, #0d2e5c, #1a4b8c);
+            color: #fff;
+            padding: 40px 0 30px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-family: "KaiTi", serif;
+            letter-spacing: 2px;
+        }
+
+        .page-header p {
+            font-size: 16px;
+            opacity: 0.85;
+            margin-top: 8px;
+        }
+
+        /* ========== 领奖台区域 ========== */
+        .top-three-section {
+            margin-bottom: 50px;
+        }
+
+        .podium-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 30px;
+            padding: 30px 0;
+        }
+
+        .podium-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 20px 20px 25px;
+            border: 1px solid var(--q-border);
+            box-shadow: 0 4px 16px rgba(0, 51, 102, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            min-width: 160px;
+        }
+
+        .podium-item:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 10px 30px rgba(0, 51, 102, 0.15);
+        }
+
+        .podium-item.first {
+            padding-bottom: 35px;
+            border-color: #c9a84c;
+            box-shadow: 0 4px 20px rgba(201, 168, 76, 0.25);
+            transform: scale(1.05);
+        }
+
+        .podium-item.first:hover {
+            transform: scale(1.08);
+        }
+
+        .podium-item .avatar-box {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .podium-item .avatar-box img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--q-border);
+            background: #f0f4fa;
+            object-fit: cover;
+        }
+
+        .podium-item.first .avatar-box img {
+            width: 100px;
+            height: 100px;
+            border-color: #c9a84c;
+        }
+
+        .rank-badge {
+            position: absolute;
+            bottom: -6px;
+            right: -6px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--q-blue);
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+        }
+
+        .podium-item.first .rank-badge {
+            background: #c9a84c;
+            width: 38px;
+            height: 38px;
+            font-size: 18px;
+        }
+
+        .podium-item .crown {
+            color: #c9a84c;
+            font-size: 32px;
+            margin-bottom: 2px;
+        }
+
+        .podium-item .work-info {
+            text-align: center;
+        }
+
+        .podium-item .work-info h3 {
+            font-size: 18px;
+            color: var(--q-blue);
+            margin-bottom: 2px;
+        }
+
+        .podium-item .work-info .author {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 6px;
+        }
+
+        .podium-item .work-info .likes {
+            font-size: 15px;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .podium-item .work-info .likes i {
+            font-size: 18px;
+        }
+
+        /* 奖励横幅 */
+        .reward-banner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: var(--q-light);
+            border-radius: var(--radius);
+            padding: 18px 30px;
+            border: 1px solid var(--q-border);
+            max-width: 700px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .reward-banner i {
+            font-size: 32px;
+            color: var(--q-blue);
+        }
+
+        .reward-banner .text {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .reward-banner .text strong {
+            display: block;
+            color: var(--q-blue);
+            font-size: 16px;
+        }
+
+        .reward-banner .text p {
+            font-size: 14px;
+            color: #555;
+            margin: 0;
+        }
+
+        .btn-outline {
+            padding: 8px 24px;
+            border: 2px solid var(--q-blue);
+            background: transparent;
+            color: var(--q-blue);
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-outline:hover {
+            background: var(--q-blue);
+            color: #fff;
+        }
+
+        /* ========== 完整榜单 & 作品展览 ========== */
+        .full-ranking-list {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 30px;
+            border: 1px solid var(--q-border);
+            box-shadow: 0 4px 16px rgba(0, 51, 102, 0.05);
+            margin-bottom: 40px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .list-header h2 {
+            font-size: 22px;
+            color: var(--q-blue);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-tabs .tab {
+            padding: 6px 18px;
+            border: 1px solid var(--q-border);
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .filter-tabs .tab:hover {
+            background: var(--q-light);
+        }
+
+        .filter-tabs .tab.active {
+            background: var(--q-blue);
+            color: #fff;
+            border-color: var(--q-blue);
+        }
+
+        /* 榜单行 */
+        .ranking-table {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ranking-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 120px 100px;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: background 0.2s;
+            gap: 10px;
+        }
+
+        .ranking-row:hover {
+            background: var(--q-light);
+        }
+
+        .col-rank {
+            font-size: 20px;
+            font-weight: bold;
+            color: #aaa;
+            text-align: center;
+            font-feature-settings: "tnum";
+        }
+
+        .ranking-row:nth-child(1) .col-rank { color: #c9a84c; }
+        .ranking-row:nth-child(2) .col-rank { color: #b0b0b0; }
+        .ranking-row:nth-child(3) .col-rank { color: #cd7f32; }
+
+        .col-work {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .col-work img {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            background: #e8edf5;
+            object-fit: cover;
+            border: 1px solid var(--q-border);
+        }
+
+        .col-work .info h4 {
+            font-size: 16px;
+            color: #222;
+        }
+
+        .col-work .info span {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .col-likes {
+            font-size: 15px;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .col-likes i {
+            font-size: 18px;
+        }
+
+        .col-action {
+            text-align: right;
+        }
+
+        .btn-like {
+            padding: 6px 16px;
+            border: 1px solid var(--q-border);
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            color: #555;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+
+        .btn-like:hover {
+            background: var(--q-blue);
+            color: #fff;
+            border-color: var(--q-blue);
+        }
+
+        .btn-like.liked {
+            background: #ffe6e6;
+            border-color: #e74c3c;
+            color: #e74c3c;
+            cursor: pointer;
+        }
+
+        .btn-like.liked:hover {
+            background: #ffd9d9;
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+
+        .btn-like i {
+            font-size: 15px;
+        }
+
+        .load-more {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .btn-text {
+            background: transparent;
+            border: none;
+            color: var(--q-blue);
+            font-size: 15px;
+            cursor: pointer;
+            padding: 8px 20px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+
+        .btn-text:hover {
+            background: var(--q-light);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--q-blue);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            padding: 10px 32px;
+            background: var(--q-blue);
+            color: #fff;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .empty-state a:hover {
+            background: #1a4b8c;
+            transform: translateY(-2px);
+        }
+
+        /* ========== 作品展览区 ========== */
+        .gallery-section {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 30px;
+            border: 1px solid var(--q-border);
+            box-shadow: 0 4px 16px rgba(0, 51, 102, 0.05);
+        }
+
+        .gallery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .gallery-header h2 {
+            font-size: 22px;
+            color: var(--q-blue);
+        }
+
+        .gallery-header p {
+            color: #777;
+            font-size: 14px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .gallery-card {
+            background: #f9fbfe;
+            border-radius: var(--radius);
+            border: 1px solid var(--q-border);
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 51, 102, 0.12);
+        }
+
+        .gallery-card .card-img {
+            width: 100%;
+            height: 180px;
+            background: #d9e3f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .gallery-card .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-card .card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .gallery-card .card-body h3 {
+            font-size: 18px;
+            color: var(--q-blue);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gallery-card .card-body .author {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .gallery-card .card-body .desc {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .gallery-card .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            border-top: 1px solid #e2eaf3;
+            padding-top: 12px;
+        }
+
+        .gallery-card .like-count {
+            font-size: 15px;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .gallery-card .btn-like-card {
+            padding: 6px 16px;
+            border: 1px solid var(--q-border);
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            color: #555;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+        }
+
+        .gallery-card .btn-like-card:hover {
+            background: var(--q-blue);
+            color: #fff;
+            border-color: var(--q-blue);
+        }
+
+        .gallery-card .btn-like-card.liked {
+            background: #ffe6e6;
+            border-color: #e74c3c;
+            color: #e74c3c;
+            cursor: pointer;
+        }
+
+        .gallery-card .btn-like-card.liked:hover {
+            background: #ffd9d9;
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+
+        /* 点赞脉冲动画 */
+        @keyframes likePulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: likePulse 0.35s ease;
+        }
+
+        /* ========== 页脚 ========== */
+        .footer {
+            background: var(--q-blue);
+            color: #fff;
+            padding: 30px 0 20px;
+            margin-top: 60px;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+            backdrop-filter: blur(10px);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 900px) {
+            .podium-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            .podium-item.first {
+                transform: scale(1);
+                order: -1;
+            }
+            .podium-item.first:hover {
+                transform: scale(1.02);
+            }
+            .ranking-row {
+                grid-template-columns: 40px 1fr 80px 70px;
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+            .col-work img {
+                width: 40px;
+                height: 40px;
+            }
+            .col-likes {
+                font-size: 13px;
+            }
+            .btn-like {
+                padding: 4px 12px;
+                font-size: 12px;
+            }
+            .navbar {
+                padding: 0 20px;
+            }
+            .nav-links {
+                gap: 15px;
+            }
+            .nav-links a {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .ranking-row {
+                grid-template-columns: 30px 1fr 60px 60px;
+                gap: 6px;
+                font-size: 12px;
+            }
+            .col-work .info h4 {
+                font-size: 14px;
+            }
+            .col-work img {
+                width: 32px;
+                height: 32px;
+            }
+            .col-likes i {
+                font-size: 14px;
+            }
+            .btn-like {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+            .list-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-tabs {
+                justify-content: center;
+            }
+            .reward-banner {
+                flex-direction: column;
+                text-align: center;
+                padding: 16px;
+            }
+            .page-header h1 {
+                font-size: 26px;
+            }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ====== 导航栏 ====== -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <div class="logo-icon">青</div>
+            <span>青韵工坊</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="create.html">开始创作</a></li>
+
+            <li><a href="ranking.html" class="active">排行榜</a></li>
+            <li><a href="profile.html">个人中心</a></li>
+        </ul>
+        <div class="nav-user" id="navUser">
+            <span class="nav-username">游客</span>
+            <div class="nav-avatar">👤</div>
+        </div>
+    </nav>
+
+    <!-- ====== 页面头部 ====== -->
+    <header class="page-header">
+        <div class="container">
+            <h1>🏆 热门纹样排行榜</h1>
+            <p>实时排名 · 基于所有用户真实作品的点赞数</p>
+        </div>
+    </header>
+
+    <!-- ====== 排行榜主体 ====== -->
+    <main class="container ranking-main" id="rankingMain">
+        
+        <!-- TOP 3 领奖台 (动态渲染) -->
+        <section class="top-three-section">
+            <div class="podium-container" id="podiumContainer">
+                <!-- JS动态填充 -->
+            </div>
+            
+            <!-- 奖励说明 -->
+            <div class="reward-banner">
+                <span style="font-size:32px;">🎁</span>
+                <div class="text">
+                    <strong>实物奖励计划</strong>
+                    <p>本周榜单前10名将免费获赠景德镇手工烧制瓷器一件</p>
+                </div>
+                <button class="btn-outline" id="ruleBtn">查看规则</button>
+            </div>
+        </section>
+
+        <!-- 完整榜单列表 (动态渲染) -->
+        <section class="full-ranking-list">
+            <div class="list-header">
+                <h2>完整榜单 · 点赞前10</h2>
+                <div class="filter-tabs">
+                    <button class="tab active" data-period="all">总榜</button>
+                    <button class="tab" data-period="recent">最新作品</button>
+                </div>
+            </div>
+
+            <div class="ranking-table" id="rankingTable">
+                <!-- JS动态填充 -->
+            </div>
+            
+            <div class="load-more">
+                <button class="btn-text" id="loadMoreBtn">加载更多作品 ...</button>
+            </div>
+        </section>
+
+        <!-- ====== 作品展览区 (点赞互动) ====== -->
+        <section class="gallery-section">
+            <div class="gallery-header">
+                <h2>🎨 作品展览 · 为你喜欢的作品点赞</h2>
+                <p>点击❤️ 点赞，助力作者登上排行榜！</p>
+            </div>
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- JS动态生成作品卡片 -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====== 页脚 ====== -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 青韵工坊 · 传承青花之美</p>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <script>
+        // ============================================================
+        // IndexedDB 操作 (与 profile.html 完全一致)
+        // ============================================================
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('QingyunWorksDB', 1);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('works')) {
+                        const store = db.createObjectStore('works', { keyPath: 'id' });
+                        store.createIndex('createdAt', 'createdAt', { unique: false });
+                        console.log('📦 IndexedDB 数据库已创建');
+                    }
+                };
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
+        async function getWorksFromIndexedDB() {
+            try {
+                const db = await openDB();
+                const transaction = db.transaction(['works'], 'readonly');
+                const store = transaction.objectStore('works');
+                const works = await new Promise((resolve) => {
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => resolve([]);
+                });
+                db.close();
+                return works;
+            } catch (e) {
+                console.error('IndexedDB 读取失败:', e);
+                return [];
+            }
+        }
+
+        // 更新作品点赞数（接收原始类型的 id，保证 store.get 正确匹配）
+        async function updateWorkLikes(realId, newLikes) {
+            try {
+                const db = await openDB();
+                const transaction = db.transaction(['works'], 'readwrite');
+                const store = transaction.objectStore('works');
+                
+                const work = await new Promise((resolve) => {
+                    const req = store.get(realId);
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => resolve(null);
+                });
+                
+                if (!work) {
+                    db.close();
+                    return false;
+                }
+                
+                work.likes = newLikes;
+                store.put(work);
+                
+                await new Promise((resolve, reject) => {
+                    transaction.oncomplete = resolve;
+                    transaction.onerror = () => reject(transaction.error);
+                });
+                db.close();
+                return true;
+            } catch (e) {
+                console.error('IndexedDB 更新点赞失败:', e);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // 点赞状态 (localStorage 持久化，统一字符串 ID)
+        // ============================================================
+        const LIKED_KEY = 'qingyun_liked_works';
+
+        function getLikedWorks() {
+            try {
+                const raw = localStorage.getItem(LIKED_KEY);
+                if (!raw) return new Set();
+                const arr = JSON.parse(raw);
+                // 统一转字符串
+                return new Set(arr.map(String));
+            } catch (e) {
+                return new Set();
+            }
+        }
+
+        function saveLikedWorks(set) {
+            try {
+                localStorage.setItem(LIKED_KEY, JSON.stringify([...set]));
+            } catch (e) {
+                console.warn('保存点赞状态失败:', e);
+            }
+        }
+
+        let likedWorks = getLikedWorks();
+
+        // ============================================================
+        // 工具函数
+        // ============================================================
+        function formatNumber(num) {
+            if (num === undefined || num === null) return '0';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // 统一获取作品 ID 字符串
+        function getWorkIdStr(work) {
+            return String(work.id);
+        }
+
+        // 从作品对象中提取展示信息
+        function getWorkDisplayInfo(work) {
+            const title = work.title || `作品 ${String(work.id).slice(-4)}`;
+            const image = work.image || `https://via.placeholder.com/400x300/1a4b8c/ffffff?text=${encodeURIComponent(title.charAt(0))}`;
+            const author = work.author || '@青韵用户';
+            const likes = work.likes || 0;
+            const desc = work.description || '精美青花瓷纹样作品';
+            const avatarSeed = work.avatarSeed || ('work-' + work.id);
+            const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(avatarSeed)}`;
+            return { title, image, author, likes, desc, avatar, id: work.id };
+        }
+
+        // ============================================================
+        // Toast
+        // ============================================================
+        function showToast(msg, duration = 2200) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        // ============================================================
+        // 全局数据
+        // ============================================================
+        let allWorks = [];          // 真实作品数据
+        let showAllRanking = false; // 是否展开完整榜单
+        let currentPeriod = 'all';  // all | recent
+
+        // ============================================================
+        // 排序函数
+        // ============================================================
+        function getSortedByLikes(works) {
+            return [...works].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+        }
+
+        function getSortedByDate(works) {
+            return [...works].sort((a, b) => {
+                const ta = a.createdAt ? new Date(a.createdAt).getTime() : (Number(a.id) || 0);
+                const tb = b.createdAt ? new Date(b.createdAt).getTime() : (Number(b.id) || 0);
+                return tb - ta;
+            });
+        }
+
+        // 根据当前周期获取排序后的数据
+        function getPeriodWorks() {
+            if (currentPeriod === 'recent') {
+                return getSortedByDate(allWorks);
+            }
+            return getSortedByLikes(allWorks);
+        }
+
+        // ============================================================
+        // 渲染领奖台 (TOP3)
+        // ============================================================
+        function renderPodium(sorted) {
+            const container = document.getElementById('podiumContainer');
+            if (!container) return;
+
+            if (!sorted || sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="width:100%;">
+                        <div class="icon">🏺</div>
+                        <h3>暂无作品</h3>
+                        <p>还没有人发布作品，快去创作第一件吧！</p>
+                        <a href="create.html">开始创作 →</a>
+                    </div>
+                `;
+                return;
+            }
+
+            if (sorted.length < 3) {
+                const rankNames = ['first', 'second', 'third'];
+                let html = '';
+                sorted.forEach((work, idx) => {
+                    const info = getWorkDisplayInfo(work);
+                    const rank = idx + 1;
+                    const rankClass = rankNames[idx] || '';
+                    html += `
+                        <div class="podium-item ${rankClass}">
+                            ${rank === 1 ? '<div class="crown">👑</div>' : ''}
+                            <div class="avatar-box">
+                                <img src="${info.avatar}" alt="用户头像" onerror="this.src='https://via.placeholder.com/80x80/1a4b8c/ffffff?text=青'">
+                                <div class="rank-badge">${rank}</div>
+                            </div>
+                            <div class="work-info">
+                                <h3>${info.title}</h3>
+                                <p class="author">${info.author}</p>
+                                <div class="likes">
+                                    <i>❤️</i> ${formatNumber(info.likes)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+                return;
+            }
+
+            // 正常展示前三名: 2nd, 1st, 3rd
+            const order = [sorted[1], sorted[0], sorted[2]];
+            const rankMap = [2, 1, 3];
+            const classMap = ['second', 'first', 'third'];
+
+            let html = '';
+            order.forEach((work, idx) => {
+                const info = getWorkDisplayInfo(work);
+                const realRank = rankMap[idx];
+                const rankClass = classMap[idx];
+                html += `
+                    <div class="podium-item ${rankClass}">
+                        ${realRank === 1 ? '<div class="crown">👑</div>' : ''}
+                        <div class="avatar-box">
+                            <img src="${info.avatar}" alt="用户头像" onerror="this.src='https://via.placeholder.com/80x80/1a4b8c/ffffff?text=青'">
+                            <div class="rank-badge">${realRank}</div>
+                        </div>
+                        <div class="work-info">
+                            <h3>${info.title}</h3>
+                            <p class="author">${info.author}</p>
+                            <div class="likes">
+                                <i>❤️</i> ${formatNumber(info.likes)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ============================================================
+        // 渲染完整榜单 (从第4名开始)
+        // ============================================================
+        function renderRankingList(sorted) {
+            const container = document.getElementById('rankingTable');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (!container) return;
+
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <h3>暂无排行数据</h3>
+                        <p>发布作品后即可参与排名</p>
+                    </div>
+                `;
+                if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+                return;
+            }
+
+            let listToRender;
+            if (showAllRanking) {
+                listToRender = sorted.slice(3);
+            } else {
+                listToRender = sorted.slice(3, 10);
+            }
+
+            if (listToRender.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="padding:20px;">
+                        <p style="color:#888;">${sorted.length <= 3 ? '暂无更多作品，前三名已在领奖台展示' : '暂无更多作品'}</p>
+                    </div>
+                `;
+                if (loadMoreBtn) {
+                    if (sorted.length > 10) {
+                        loadMoreBtn.style.display = 'block';
+                        loadMoreBtn.textContent = showAllRanking ? '收起部分作品' : '加载更多作品 ...';
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                }
+                return;
+            }
+
+            let html = '';
+            listToRender.forEach((work) => {
+                // 用字符串比较计算排名
+                const rankIndex = sorted.findIndex(w => getWorkIdStr(w) === getWorkIdStr(work));
+                const rank = rankIndex + 1;
+                const info = getWorkDisplayInfo(work);
+                const workIdStr = getWorkIdStr(work);
+                const isLiked = likedWorks.has(workIdStr);
+                const btnClass = isLiked ? 'btn-like liked' : 'btn-like';
+                const btnText = isLiked ? '❤️ 已赞' : '👍 点赞';
+
+                html += `
+                    <div class="ranking-row" data-id="${workIdStr}">
+                        <div class="col-rank">${rank}</div>
+                        <div class="col-work">
+                            <img src="${info.image}" alt="作品缩略图" onerror="this.src='https://via.placeholder.com/60x60/1a4b8c/ffffff?text=青'">
+                            <div class="info">
+                                <h4>${info.title}</h4>
+                                <span>${info.author}</span>
+                            </div>
+                        </div>
+                        <div class="col-likes">
+                            ❤️ <span class="like-num">${formatNumber(info.likes)}</span>
+                        </div>
+                        <div class="col-action">
+                            <button class="${btnClass}" data-id="${workIdStr}">${btnText}</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            // 绑定点赞事件
+            container.querySelectorAll('.btn-like').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const workIdStr = this.getAttribute('data-id');
+                    handleLike(workIdStr);
+                });
+            });
+
+            // 加载更多按钮
+            if (loadMoreBtn) {
+                if (sorted.length <= 10 && !showAllRanking) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'block';
+                    loadMoreBtn.textContent = showAllRanking ? '收起部分作品' : '加载更多作品 ...';
+                }
+            }
+        }
+
+        // ============================================================
+        // 渲染作品展览区 (按创建时间倒序，点赞不改变位置)
+        // ============================================================
+        function renderGallery() {
+            const container = document.getElementById('galleryGrid');
+            if (!container) return;
+
+            const sorted = getSortedByDate(allWorks);
+
+            if (sorted.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="icon">🎨</div>
+                        <h3>还没有作品</h3>
+                        <p>成为第一个发布作品的创作者吧！</p>
+                        <a href="create.html">开始创作 →</a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            sorted.forEach(work => {
+                const info = getWorkDisplayInfo(work);
+                const workIdStr = getWorkIdStr(work);
+                const isLiked = likedWorks.has(workIdStr);
+                const btnClass = isLiked ? 'btn-like-card liked' : 'btn-like-card';
+                const btnText = isLiked ? '❤️ 已赞' : '👍 点赞';
+
+                html += `
+                    <div class="gallery-card" data-id="${workIdStr}">
+                        <div class="card-img">
+                            <img src="${info.image}" alt="${info.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x180/1a4b8c/ffffff?text=青花'">
+                        </div>
+                        <div class="card-body">
+                            <h3>${info.title}</h3>
+                            <div class="author">
+                                <img src="${info.avatar}" alt="头像" style="width:20px;height:20px;border-radius:50%;" onerror="this.style.display='none'">
+                                ${info.author}
+                            </div>
+                            <p class="desc">${info.desc}</p>
+                            <div class="card-footer">
+                                <span class="like-count">❤️ <span class="like-num">${formatNumber(info.likes)}</span></span>
+                                <button class="${btnClass}" data-id="${workIdStr}">${btnText}</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            // 绑定展览卡片点赞按钮
+            container.querySelectorAll('.btn-like-card').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const workIdStr = this.getAttribute('data-id');
+                    handleLike(workIdStr);
+                });
+            });
+        }
+
+        // ============================================================
+        // 渲染排行榜区域（领奖台 + 榜单）
+        // ============================================================
+        function renderLeaderboard() {
+            const sorted = getPeriodWorks();
+            renderPodium(sorted);
+            renderRankingList(sorted);
+        }
+
+        // 全量渲染（首次加载或切换标签时用）
+        function renderAll() {
+            renderLeaderboard();
+            renderGallery();
+        }
+
+        // ============================================================
+        // 局部更新展览区某个作品的 UI（点赞不跳位）
+        // ============================================================
+        function updateGalleryUI(workIdStr) {
+            const work = allWorks.find(w => getWorkIdStr(w) === workIdStr);
+            if (!work) return;
+            const isLiked = likedWorks.has(workIdStr);
+            const likesDisplay = formatNumber(work.likes || 0);
+
+            document.querySelectorAll(`.gallery-card[data-id="${CSS.escape(workIdStr)}"]`).forEach(card => {
+                const likeNum = card.querySelector('.like-num');
+                if (likeNum) likeNum.textContent = likesDisplay;
+                const btn = card.querySelector('.btn-like-card');
+                if (btn) {
+                    btn.className = isLiked ? 'btn-like-card liked' : 'btn-like-card';
+                    btn.textContent = isLiked ? '❤️ 已赞' : '👍 点赞';
+                    // 脉冲动画
+                    btn.classList.remove('pulse');
+                    void btn.offsetWidth; // 强制重绘
+                    btn.classList.add('pulse');
+                }
+            });
+        }
+
+        // ============================================================
+        // 点赞处理（核心：精准对应被点击的作品）
+        // ============================================================
+        async function handleLike(workIdStr) {
+            // 用字符串严格匹配，找到被点击的作品
+            const work = allWorks.find(w => getWorkIdStr(w) === workIdStr);
+            if (!work) {
+                showToast('⚠️ 作品不存在或已被删除');
+                return;
+            }
+
+            const realId = work.id; // 原始类型，用于 IndexedDB
+            const isLiked = likedWorks.has(workIdStr);
+            let newLikes = work.likes || 0;
+
+            if (isLiked) {
+                likedWorks.delete(workIdStr);
+                newLikes = Math.max(0, newLikes - 1);
+            } else {
+                likedWorks.add(workIdStr);
+                newLikes = newLikes + 1;
+            }
+
+            // 更新内存
+            work.likes = newLikes;
+            saveLikedWorks(likedWorks);
+
+            // 持久化
+            const ok = await updateWorkLikes(realId, newLikes);
+            if (!ok) {
+                showToast('⚠️ 点赞保存失败，请重试');
+                // 回滚
+                if (isLiked) {
+                    likedWorks.add(workIdStr);
+                    work.likes = newLikes + 1;
+                } else {
+                    likedWorks.delete(workIdStr);
+                    work.likes = newLikes - 1;
+                }
+                saveLikedWorks(likedWorks);
+                return;
+            }
+
+            // 局部更新展览区（不跳位）
+            updateGalleryUI(workIdStr);
+
+            // 重新渲染排行榜区域（排序可能变化）
+            renderLeaderboard();
+
+            showToast(isLiked ? '💔 已取消点赞' : '❤️ 点赞成功！');
+        }
+
+        // ============================================================
+        // 数据加载与自动刷新
+        // ============================================================
+        async function loadWorks() {
+            const works = await getWorksFromIndexedDB();
+            allWorks = works;
+            renderAll();
+            console.log('✅ 排行榜已加载真实作品:', works.length, '件');
+        }
+
+        // 监听作品保存事件
+        window.addEventListener('workSaved', async function(e) {
+            console.log('📥 排行榜收到 workSaved 事件:', e.detail);
+            await loadWorks();
+            showToast('🎉 检测到新作品，排行榜已更新！');
+        });
+
+        // 定时轮询检查变化
+        let lastWorksHash = '';
+        function computeHash(works) {
+            return works.map(w => `${w.id}:${w.likes || 0}:${w.title || ''}`).join('|');
+        }
+
+        async function checkForChanges() {
+            const works = await getWorksFromIndexedDB();
+            const hash = computeHash(works);
+            if (hash !== lastWorksHash) {
+                lastWorksHash = hash;
+                allWorks = works;
+                renderAll();
+                console.log('🔄 排行榜数据已刷新');
+            }
+        }
+
+        // ============================================================
+        // 事件绑定
+        // ============================================================
+        function initEvents() {
+            // 筛选标签切换
+            const tabs = document.querySelectorAll('.filter-tabs .tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentPeriod = this.getAttribute('data-period') || 'all';
+                    renderLeaderboard();
+                });
+            });
+
+            // 加载更多
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', function() {
+                    showAllRanking = !showAllRanking;
+                    renderLeaderboard();
+                });
+            }
+
+            // 规则按钮
+            const ruleBtn = document.getElementById('ruleBtn');
+            if (ruleBtn) {
+                ruleBtn.addEventListener('click', function() {
+                    alert('🏺 实物奖励规则：\n每周点赞前10名作品，作者将获得由景德镇匠人手工烧制的青花瓷器一件。');
+                });
+            }
+
+            // 用户头像点击
+            const navUser = document.getElementById('navUser');
+            if (navUser) {
+                navUser.addEventListener('click', function() {
+                    showToast('👤 游客模式，登录后可参与点赞和作品投稿！');
+                });
+            }
+        }
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        async function init() {
+            await loadWorks();
+            lastWorksHash = computeHash(allWorks);
+            initEvents();
+
+            // 定时刷新 (每5秒检查一次)
+            setInterval(checkForChanges, 5000);
+
+            console.log('✅ 排行榜页面初始化完成，使用真实 IndexedDB 数据');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

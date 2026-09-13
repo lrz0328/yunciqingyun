@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青韵工坊 · 个人中心</title>
+    <style>
+        /* ========== 全局重置与变量 ========== */
+        :root {
+            --q-blue: #003366;
+            --q-light: #e6f0ff;
+            --q-border: #b3cde0;
+            --bg-body: #fcfcfc;
+            --text-main: #333;
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-top: 70px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ========== 顶部导航栏 ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            border-bottom: 2px solid var(--q-blue);
+            box-shadow: 0 2px 10px rgba(0, 51, 102, 0.05);
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--q-blue);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--q-blue);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "KaiTi", serif;
+            font-size: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+            color: #333;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--q-blue);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--q-blue);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .nav-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--q-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--q-border);
+        }
+
+        /* ========== 个人头部信息区 ========== */
+        .profile-header {
+            background: linear-gradient(135deg, #0d2e5c, #1a4b8c);
+            color: #fff;
+            padding: 40px 0 35px;
+            margin-bottom: 40px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .avatar-box {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar-box img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            background: #2a4a7a;
+            object-fit: cover;
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--q-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .edit-avatar-btn:hover {
+            background: #fff;
+            transform: scale(1.1);
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .user-details h2 {
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .vip-icon {
+            color: #ffd700;
+            font-size: 22px;
+        }
+
+        .user-details .bio {
+            font-size: 15px;
+            opacity: 0.85;
+            margin: 6px 0 12px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stats-row .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stats-row .stat-item .num {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .stats-row .stat-item .label {
+            font-size: 13px;
+            opacity: 0.75;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #fff;
+            color: var(--q-blue);
+        }
+
+        .btn-primary:hover {
+            background: var(--q-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #fff;
+        }
+
+        /* ========== 作品管理区 ========== */
+        .main-content {
+            padding-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .section-header h3 {
+            font-size: 24px;
+            color: var(--q-blue);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-tabs .tab {
+            padding: 6px 18px;
+            border: 1px solid var(--q-border);
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .filter-tabs .tab:hover {
+            background: var(--q-light);
+        }
+
+        .filter-tabs .tab.active {
+            background: var(--q-blue);
+            color: #fff;
+            border-color: var(--q-blue);
+        }
+
+        /* 作品网格 */
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .work-card {
+            background: #fff;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--q-border);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .work-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 51, 102, 0.1);
+        }
+
+        .card-img {
+            position: relative;
+            height: 180px;
+            overflow: hidden;
+            background: #e8edf5;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .status-badge.published {
+            background: #27ae60;
+        }
+
+        .status-badge.draft {
+            background: #f39c12;
+        }
+
+        .status-badge.beautified {
+            background: #9b59b6;
+        }
+
+        .card-body {
+            padding: 16px 18px;
+        }
+
+        .card-body h4 {
+            font-size: 16px;
+            color: #222;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .model-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #88ddff;
+            border: 1px solid rgba(136, 221, 255, 0.3);
+        }
+
+        /* ========== 卡片操作按钮 ========== */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            padding: 8px 18px 14px;
+            border-top: 1px solid #f0f0f0;
+            flex-wrap: wrap;
+        }
+
+        .card-actions .action-btn {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .card-actions .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .card-actions .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .card-actions .view-btn {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .card-actions .view-btn:hover {
+            background: #1a252f;
+            transform: scale(1.05);
+        }
+
+        .card-actions .delete-btn-sm {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .card-actions .delete-btn-sm:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        /* 空状态卡片 */
+        .work-card.empty-slot {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            border: 2px dashed var(--q-border);
+            background: #fafcff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .work-card.empty-slot:hover {
+            border-color: var(--q-blue);
+            background: var(--q-light);
+        }
+
+        .empty-content {
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-content i {
+            font-size: 48px;
+            color: var(--q-border);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .empty-content p {
+            font-size: 15px;
+        }
+
+        /* ========== 3D预览对话框 ========== */
+        #viewer-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        #viewer-dialog.show {
+            display: flex;
+        }
+
+        .viewer-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
+        }
+
+        .viewer-header h2 {
+            color: #fff;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .viewer-header .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 28px;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 0 10px;
+        }
+
+        .viewer-header .close-btn:hover {
+            color: #fff;
+        }
+
+        .viewer-canvas-container {
+            flex: 1;
+            min-height: 400px;
+            position: relative;
+            background: #0d0d1a;
+        }
+
+        #viewer-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .viewer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .viewer-info .details {
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .viewer-info .details span {
+            margin-right: 16px;
+        }
+
+        .viewer-info .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .viewer-info .actions button {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .viewer-info .actions .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .viewer-info .actions .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+
+        .viewer-info .actions .download-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .viewer-info .actions .download-btn:hover {
+            background: #2ecc71;
+            transform: scale(1.05);
+        }
+
+        .viewer-info .actions .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .viewer-info .actions .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        /* Toast 提示 */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+            backdrop-filter: blur(10px);
+            max-width: 90%;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* ========== 响应式 ========== */
+        @media (max-width: 900px) {
+            .profile-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            .stats-row {
+                justify-content: center;
+            }
+            .action-buttons {
+                justify-content: center;
+            }
+            .user-details h2 {
+                justify-content: center;
+            }
+            .navbar {
+                padding: 0 20px;
+            }
+            .nav-links {
+                gap: 15px;
+            }
+            .nav-links a {
+                font-size: 14px;
+            }
+            .works-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            .viewer-content {
+                max-width: 100%;
+                max-height: 95vh;
+            }
+            .viewer-canvas-container {
+                min-height: 300px;
+            }
+            .viewer-info {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+            .viewer-info .actions {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .works-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .section-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-tabs {
+                justify-content: center;
+            }
+            .avatar-box img {
+                width: 80px;
+                height: 80px;
+            }
+            .user-details h2 {
+                font-size: 20px;
+            }
+            .stats-row .stat-item .num {
+                font-size: 18px;
+            }
+            .card-actions {
+                flex-direction: column;
+            }
+            .card-actions .action-btn {
+                padding: 8px 12px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .works-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- Three.js -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- ====== 导航栏 ====== -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">
+            <div class="logo-icon">青</div>
+            <span>青韵工坊</span>
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="create.html">开始创作</a></li>
+
+            <li><a href="ranking.html">排行榜</a></li>
+            <li><a href="profile.html" class="active">个人中心</a></li>
+        </ul>
+        <div class="nav-user">
+            <span class="nav-username">游客</span>
+            <div class="nav-avatar">👤</div>
+        </div>
+    </nav>
+
+    <!-- ====== 个人头部信息 ====== -->
+    <header class="profile-header">
+        <div class="container profile-info">
+            <div class="avatar-box">
+                <img src="https://api.dicebear.com/7.x/notionists/svg?seed=Felix" alt="用户头像">
+                <button class="edit-avatar-btn" title="更换头像">📷</button>
+            </div>
+            <div class="user-details">
+                <h2>
+                    青花爱好者_007
+                    <span class="vip-icon">👑</span>
+                </h2>
+                <p class="bio">致力于传承非遗文化，热爱每一抹青花蓝。</p>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="num" id="workCount">0</span>
+                        <span class="label">作品</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="num">3.5k</span>
+                        <span class="label">获赞</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="num">286</span>
+                        <span class="label">粉丝</span>
+                    </div>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary">编辑资料</button>
+                <button class="btn btn-outline">分享主页</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====== 作品管理区 ====== -->
+    <main class="container main-content">
+        <div class="section-header">
+            <h3>我的作品 <span style="font-size:14px;color:#888;font-weight:normal;" id="workSubtitle">(共0件)</span></h3>
+            <div class="filter-tabs">
+                <button class="tab active" data-filter="all">全部</button>
+                <button class="tab" data-filter="published">已发布</button>
+                <button class="tab" data-filter="beautified">✨ 美化版</button>
+            </div>
+        </div>
+
+        <div class="works-grid" id="worksGrid">
+            <!-- 由 JavaScript 动态渲染 -->
+        </div>
+    </main>
+
+    <!-- ====== 3D预览对话框 ====== -->
+    <div id="viewer-dialog">
+        <div class="viewer-content">
+            <div class="viewer-header">
+                <h2 id="viewerTitle">📦 3D作品预览</h2>
+                <button class="close-btn" id="viewerClose">✕</button>
+            </div>
+            <div class="viewer-canvas-container">
+                <canvas id="viewer-canvas"></canvas>
+            </div>
+            <div class="viewer-info">
+                <div class="details" id="viewerDetails">
+                    <span>📅 <span id="viewerDate">--</span></span>
+                    <span>🎨 纹样: <span id="viewerDecals">0</span></span>
+                    <span>🖌️ 画笔: <span id="viewerPaint">0</span></span>
+                </div>
+                <div class="actions">
+                    <button class="edit-btn" id="viewerEdit">✏️ 继续编辑</button>
+                    <button class="download-btn" id="viewerDownload">⬇️ 导出GLB</button>
+                    <button class="delete-btn" id="viewerDelete">🗑️ 删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast"></div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // ============================================================
+        // IndexedDB 操作
+        // ============================================================
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('QingyunWorksDB', 1);
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('works')) {
+                        const store = db.createObjectStore('works', { keyPath: 'id' });
+                        store.createIndex('createdAt', 'createdAt', { unique: false });
+                        console.log('📦 IndexedDB 数据库已创建');
+                    }
+                };
+                request.onsuccess = () => {
+                    console.log('✅ IndexedDB 连接成功');
+                    resolve(request.result);
+                };
+                request.onerror = () => {
+                    console.error('❌ IndexedDB 连接失败:', request.error);
+                    reject(request.error);
+                };
+            });
+        }
+
+        async function getWorksFromIndexedDB() {
+            try {
+                const db = await openDB();
+                const transaction = db.transaction(['works'], 'readonly');
+                const store = transaction.objectStore('works');
+                const works = await new Promise((resolve) => {
+                    const request = store.getAll();
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => resolve([]);
+                });
+                db.close();
+                return works.sort((a, b) => b.id - a.id);
+            } catch (e) {
+                console.error('IndexedDB 读取失败:', e);
+                return [];
+            }
+        }
+
+        async function deleteWorkFromIndexedDB(id) {
+            try {
+                const db = await openDB();
+                const transaction = db.transaction(['works'], 'readwrite');
+                const store = transaction.objectStore('works');
+                store.delete(id);
+                await new Promise((resolve, reject) => {
+                    transaction.oncomplete = resolve;
+                    transaction.onerror = () => reject(transaction.error);
+                });
+                db.close();
+                console.log('✅ 已从 IndexedDB 删除作品:', id);
+                return true;
+            } catch (e) {
+                console.error('IndexedDB 删除失败:', e);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // 跳转到创作页面继续编辑
+        // ============================================================
+        function continueEditing(workId) {
+            // 使用 URL 参数传递作品ID
+            window.location.href = `create.html?edit=${workId}`;
+        }
+
+        // ============================================================
+        // Toast 提示
+        // ============================================================
+        function showToast(msg, duration = 2500) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.style.display = 'none';
+            }, duration);
+        }
+
+        // ============================================================
+        // 渲染作品列表
+        // ============================================================
+        let currentFilter = 'all';
+        let currentViewingWork = null;
+        let viewerScene = null;
+        let viewerCamera = null;
+        let viewerRenderer = null;
+        let viewerControls = null;
+        let viewerModel = null;
+        let animationId = null;
+
+        async function renderWorks(filter) {
+            const grid = document.getElementById('worksGrid');
+            if (!grid) return;
+
+            let works = await getWorksFromIndexedDB();
+            const count = works.length;
+
+            document.getElementById('workCount').textContent = count;
+            document.getElementById('workSubtitle').textContent = `(共${count}件)`;
+
+            if (filter === 'published') {
+                works = works.filter(w => !w.isBeautified);
+            } else if (filter === 'beautified') {
+                works = works.filter(w => w.isBeautified === true);
+            }
+
+            works.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            if (works.length === 0) {
+                grid.innerHTML = `
+                    <div class="work-card empty-slot" id="createNew">
+                        <div class="empty-content">
+                            <span style="font-size:48px;display:block;color:#b3cde0;">🎨</span>
+                            <p>${count === 0 ? '还没有作品，去创作吧！' : '没有符合条件的作品'}</p>
+                            ${count === 0 ? '<a href="create.html" style="display:inline-block;margin-top:8px;padding:8px 24px;background:#003366;color:#fff;border-radius:20px;text-decoration:none;">开始创作 →</a>' : ''}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            works.forEach(work => {
+                const title = work.title || `作品 ${String(work.id).slice(-4)}`;
+                const imgSrc = work.image || 'https://via.placeholder.com/400x300/1a4b8c/ffffff?text=青花';
+                const date = work.createdAt ? new Date(work.createdAt).toLocaleDateString('zh-CN') : '未知';
+                const isBeautified = work.isBeautified ? '✨ ' : '';
+                const hasGLB = work.glbData && work.glbData.length > 0;
+
+                let badgeClass = 'published';
+                let badgeText = '已发布';
+                if (work.isBeautified) {
+                    badgeClass = 'beautified';
+                    badgeText = '✨ 美化版';
+                } else if (work.decals === 0 && work.paintPoints === 0) {
+                    badgeClass = 'draft';
+                    badgeText = '草稿';
+                }
+
+                html += `
+                    <div class="work-card" data-id="${work.id}">
+                        <div class="card-img">
+                            <img src="${imgSrc}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300/1a4b8c/ffffff?text=青花'">
+                            <span class="status-badge ${badgeClass}">${badgeText}</span>
+                            ${hasGLB ? '<span class="model-badge">📦 3D</span>' : ''}
+                        </div>
+                        <div class="card-body">
+                            <h4>${isBeautified}${title}</h4>
+                            <div class="card-meta">
+                                <span>📅 ${date}</span>
+                                <span>❤️ ${work.likes || 0}</span>
+                            </div>
+                            ${work.description ? `<p style="font-size:12px;color:#888;margin:4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${work.description}</p>` : ''}
+                        </div>
+                        <div class="card-actions">
+                            <button class="action-btn edit-btn" data-action="edit" data-id="${work.id}">✏️ 继续编辑</button>
+                            <button class="action-btn view-btn" data-action="view" data-id="${work.id}">👁️ 预览</button>
+                            <button class="action-btn delete-btn-sm" data-action="delete" data-id="${work.id}">🗑️ 删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="work-card empty-slot" id="createNew">
+                    <div class="empty-content">
+                        <span style="font-size:48px;display:block;color:#b3cde0;">➕</span>
+                        <p>创建新作品</p>
+                    </div>
+                </div>
+            `;
+
+            grid.innerHTML = html;
+            console.log('✅ 渲染完成，显示', works.length, '件作品');
+        }
+
+        // ============================================================
+        // 3D 预览器
+        // ============================================================
+        function initViewer() {
+            const container = document.querySelector('.viewer-canvas-container');
+            const canvas = document.getElementById('viewer-canvas');
+            
+            if (!container || !canvas) return;
+
+            const width = container.clientWidth || 600;
+            const height = container.clientHeight || 400;
+
+            viewerScene = new THREE.Scene();
+            viewerScene.background = new THREE.Color(0x0d0d1a);
+
+            viewerCamera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+            viewerCamera.position.set(0, 20, 60);
+
+            viewerRenderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true
+            });
+            viewerRenderer.setSize(width, height);
+            viewerRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            viewerRenderer.shadowMap.enabled = true;
+
+            // 灯光
+            const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+            viewerScene.add(ambient);
+
+            const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.0);
+            dirLight1.position.set(50, 100, 50);
+            viewerScene.add(dirLight1);
+
+            const dirLight2 = new THREE.DirectionalLight(0xaaccff, 0.5);
+            dirLight2.position.set(-50, 50, -50);
+            viewerScene.add(dirLight2);
+
+            const gridHelper = new THREE.GridHelper(100, 20, 0x444466, 0x222244);
+            viewerScene.add(gridHelper);
+
+            viewerControls = new OrbitControls(viewerCamera, viewerRenderer.domElement);
+            viewerControls.enableDamping = true;
+            viewerControls.dampingFactor = 0.1;
+            viewerControls.minDistance = 10;
+            viewerControls.maxDistance = 200;
+            viewerControls.target.set(0, 0, 0);
+
+            // 窗口调整
+            window.addEventListener('resize', () => {
+                if (!document.getElementById('viewer-dialog').classList.contains('show')) return;
+                const w = container.clientWidth || 600;
+                const h = container.clientHeight || 400;
+                viewerCamera.aspect = w / h;
+                viewerCamera.updateProjectionMatrix();
+                viewerRenderer.setSize(w, h);
+            });
+
+            animateViewer();
+        }
+
+        function animateViewer() {
+            if (!viewerControls) return;
+            animationId = requestAnimationFrame(animateViewer);
+            viewerControls.update();
+            viewerRenderer.render(viewerScene, viewerCamera);
+        }
+
+        function loadModelToViewer(work) {
+            if (!viewerScene || !viewerRenderer) {
+                initViewer();
+                setTimeout(() => loadModelToViewer(work), 100);
+                return;
+            }
+
+            currentViewingWork = work;
+
+            // 清除旧模型
+            if (viewerModel) {
+                viewerScene.remove(viewerModel);
+                viewerModel = null;
+            }
+
+            // 更新标题和信息
+            document.getElementById('viewerTitle').textContent = `📦 ${work.title || '未命名作品'}`;
+            document.getElementById('viewerDate').textContent = work.createdAt ? new Date(work.createdAt).toLocaleString('zh-CN') : '--';
+            document.getElementById('viewerDecals').textContent = work.decals || 0;
+            document.getElementById('viewerPaint').textContent = work.paintPoints || 0;
+
+            // 如果有GLB数据，加载
+            if (work.glbData && work.glbData.length > 0) {
+                try {
+                    const binaryString = atob(work.glbData);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const arrayBuffer = bytes.buffer;
+
+                    const loader = new GLTFLoader();
+                    loader.parse(arrayBuffer, '', (gltf) => {
+                        viewerModel = gltf.scene;
+                        viewerScene.add(viewerModel);
+
+                        const box = new THREE.Box3().setFromObject(viewerModel);
+                        const center = box.getCenter(new THREE.Vector3());
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        
+                        if (maxDim > 0 && isFinite(maxDim)) {
+                            const scale = 30 / maxDim;
+                            viewerModel.scale.set(scale, scale, scale);
+                            viewerModel.position.sub(center.multiplyScalar(scale));
+                        }
+
+                        viewerControls.target.set(0, 0, 0);
+                        viewerCamera.position.set(0, 20, 60);
+                        viewerControls.update();
+
+                        showToast('✅ 3D模型加载成功！');
+                    }, (error) => {
+                        console.error('GLB解析失败:', error);
+                        showToast('⚠️ 模型数据损坏，无法预览');
+                    });
+                } catch (e) {
+                    console.error('加载模型失败:', e);
+                    showToast('⚠️ 模型加载失败');
+                }
+            } else {
+                showToast('💡 该作品暂无3D数据，仅显示缩略图');
+            }
+        }
+
+        function closeViewer() {
+            document.getElementById('viewer-dialog').classList.remove('show');
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+            if (viewerModel) {
+                viewerScene.remove(viewerModel);
+                viewerModel = null;
+            }
+            currentViewingWork = null;
+        }
+
+        function openViewer(work) {
+            const dialog = document.getElementById('viewer-dialog');
+            dialog.classList.add('show');
+            
+            if (!viewerRenderer) {
+                initViewer();
+            }
+            
+            setTimeout(() => {
+                loadModelToViewer(work);
+            }, 100);
+        }
+
+        // ============================================================
+        // 导出和删除功能
+        // ============================================================
+        function downloadGLB(work) {
+            if (!work.glbData) {
+                showToast('⚠️ 该作品没有3D数据');
+                return;
+            }
+
+            try {
+                const binaryString = atob(work.glbData);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                const blob = new Blob([bytes], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${work.title || '作品'}.glb`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('✅ GLB文件下载成功！');
+            } catch (e) {
+                console.error('下载失败:', e);
+                showToast('❌ 下载失败');
+            }
+        }
+
+        async function handleDeleteWork(work) {
+            if (!confirm(`确定要删除作品「${work.title || '未命名'}」吗？此操作不可恢复！`)) {
+                return;
+            }
+
+            await deleteWorkFromIndexedDB(work.id);
+            if (document.getElementById('viewer-dialog').classList.contains('show')) {
+                closeViewer();
+            }
+            await renderWorks(currentFilter);
+            showToast('🗑️ 作品已删除');
+        }
+
+        // ============================================================
+        // ★★★ 自动刷新：监听 workSaved 事件 ★★★
+        // ============================================================
+        async function checkForNewWorks() {
+            const currentWorks = await getWorksFromIndexedDB();
+            const currentCount = currentWorks.length;
+            
+            if (window._lastWorkCount === undefined) {
+                window._lastWorkCount = currentCount;
+                return;
+            }
+            
+            if (currentCount !== window._lastWorkCount) {
+                console.log('🔄 检测到作品数量变化:', window._lastWorkCount, '→', currentCount);
+                window._lastWorkCount = currentCount;
+                await renderWorks(currentFilter);
+                if (currentCount > window._lastWorkCount) {
+                    showToast('🎉 检测到新作品！已自动刷新');
+                }
+            }
+        }
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        async function init() {
+            // 首次加载
+            const works = await getWorksFromIndexedDB();
+            window._lastWorkCount = works.length;
+            await renderWorks(currentFilter);
+            
+            console.log('✅ 个人中心已加载（IndexedDB），共 ' + works.length + ' 件作品');
+            if (works.length > 0) {
+                console.log('📋 作品列表:', works.map(w => w.title || '未命名'));
+            }
+
+            // ★★★ 监听作品保存事件 ★★★
+            window.addEventListener('workSaved', async function(e) {
+                console.log('📥 收到 workSaved 事件:', e.detail);
+                const newWorks = await getWorksFromIndexedDB();
+                window._lastWorkCount = newWorks.length;
+                await renderWorks(currentFilter);
+                showToast('🎉 新作品已保存！');
+            });
+
+            // ★★★ 定时检查 IndexedDB 变化 ★★★
+            setInterval(checkForNewWorks, 5000);
+
+            // ============================================================
+            // ★★★ 事件委托：处理作品卡片的点击 ★★★
+            // ============================================================
+            document.getElementById('worksGrid').addEventListener('click', async function(e) {
+                const card = e.target.closest('.work-card');
+                if (!card) return;
+                
+                // 创建新作品
+                if (card.id === 'createNew') {
+                    window.location.href = 'create.html';
+                    return;
+                }
+                
+                const id = parseInt(card.dataset.id);
+                if (!id) return;
+                
+                const works = await getWorksFromIndexedDB();
+                const work = works.find(w => w.id === id);
+                if (!work) {
+                    showToast('⚠️ 作品不存在');
+                    return;
+                }
+                
+                // 判断点击的是哪个按钮
+                const actionBtn = e.target.closest('.action-btn');
+                if (actionBtn) {
+                    const action = actionBtn.dataset.action;
+                    
+                    if (action === 'edit') {
+                        // ★★★ 继续编辑：跳转到创作页面 ★★★
+                        continueEditing(id);
+                        return;
+                    } else if (action === 'view') {
+                        // 预览
+                        openViewer(work);
+                        return;
+                    } else if (action === 'delete') {
+                        // 删除
+                        await handleDeleteWork(work);
+                        return;
+                    }
+                }
+                
+                // 点击卡片其他区域 → 预览
+                openViewer(work);
+            });
+
+            // 标签切换
+            document.querySelectorAll('.filter-tabs .tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    renderWorks(currentFilter);
+                });
+            });
+
+            // ============================================================
+            // 预览对话框按钮事件
+            // ============================================================
+            // 关闭
+            document.getElementById('viewerClose').addEventListener('click', closeViewer);
+            document.getElementById('viewer-dialog').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    closeViewer();
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && document.getElementById('viewer-dialog').classList.contains('show')) {
+                    closeViewer();
+                }
+            });
+
+            // ★★★ 继续编辑（预览对话框中的按钮） ★★★
+            document.getElementById('viewerEdit').addEventListener('click', () => {
+                if (currentViewingWork) {
+                    continueEditing(currentViewingWork.id);
+                }
+            });
+
+            // 下载GLB
+            document.getElementById('viewerDownload').addEventListener('click', () => {
+                if (currentViewingWork) {
+                    downloadGLB(currentViewingWork);
+                }
+            });
+
+            // 删除作品
+            document.getElementById('viewerDelete').addEventListener('click', () => {
+                if (currentViewingWork) {
+                    handleDeleteWork(currentViewingWork);
+                }
+            });
+
+            // 用户头像点击
+            document.querySelector('.nav-user')?.addEventListener('click', function() {
+                showToast('👤 游客模式，登录后可管理作品和互动！');
+            });
+
+            // 编辑头像
+            document.querySelector('.edit-avatar-btn')?.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showToast('📷 点击上传新头像 (演示功能)');
+            });
+
+            // 编辑资料 / 分享主页
+            document.querySelector('.btn-primary')?.addEventListener('click', function() {
+                showToast('✏️ 跳转至资料编辑页 (演示功能)');
+            });
+
+            document.querySelector('.btn-outline')?.addEventListener('click', function() {
+                showToast('🔗 复制个人主页链接 (演示功能)');
+            });
+
+            // 手动刷新（双击作品数量）
+            document.getElementById('workCount')?.addEventListener('dblclick', async function() {
+                await renderWorks(currentFilter);
+                showToast('🔄 已刷新');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

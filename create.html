@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>青韵工坊 · 纹样创作工具</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #1a1a2e;
+            color: white;
+            padding-top: 70px;
+            height: 100vh;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: rgba(26, 26, 46, 0.92);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+            border-bottom: 2px solid #003366;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: bold; color: #e6f0ff; }
+        .logo-icon { width: 40px; height: 40px; background: #003366; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: "KaiTi", serif; font-size: 20px; }
+        .nav-links { display: flex; gap: 30px; list-style: none; }
+        .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 500; transition: color 0.3s; position: relative; }
+        .nav-links a:hover, .nav-links a.active { color: #fff; }
+        .nav-links a.active::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #3498db; }
+        .nav-user { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.8); }
+        .nav-avatar { width: 36px; height: 36px; background: #2a2a4a; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #444; }
+
+        #container {
+            width: 100vw;
+            height: calc(100vh - 70px);
+            position: relative;
+            background: #1a1a2e;
+        }
+
+        /* 顶部工具栏 */
+        #toolbar {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            flex-wrap: wrap;
+            justify-content: center;
+            pointer-events: auto;
+        }
+        .btn {
+            padding: 5px 14px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            color: white;
+            background: transparent;
+            white-space: nowrap;
+        }
+        .btn:hover { background: rgba(255,255,255,0.12); }
+        .btn.active { background: #3498db; font-weight: bold; }
+        .btn.paint-active { background: #e74c3c; font-weight: bold; }
+        .btn.save-btn { background: #27ae60; font-weight: bold; }
+        .btn.save-btn:hover { background: #2ecc71; }
+        .upload-label {
+            padding: 5px 14px;
+            background: #e74c3c;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            color: white;
+            white-space: nowrap;
+        }
+        .upload-label:hover { background: #c0392b; }
+        #file-input { display: none; }
+
+        /* 示例模型 */
+        #sampleLibrary {
+            position: absolute;
+            top: 76px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 19;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap;
+            justify-content: center;
+            pointer-events: auto;
+        }
+        .sample-btn {
+            padding: 4px 14px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .sample-btn:hover { background: rgba(52,152,219,0.25); border-color: #3498db; }
+
+        /* 右侧纹样 */
+        #pattern-panel {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 15;
+            pointer-events: auto;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            padding: 8px 6px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .pattern-item {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            overflow: hidden;
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pattern-item:hover { transform: scale(1.06); }
+        .pattern-item.selected { border-color: #3498db; box-shadow: 0 0 12px rgba(52,152,219,0.3); }
+        .pattern-item img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* 画笔工具 */
+        #paint-toolbar {
+            position: absolute;
+            left: 50%;
+            top: 126px;
+            transform: translateX(-50%);
+            display: none;
+            gap: 10px;
+            z-index: 18;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+        #paint-toolbar.show { display: flex; }
+        .color-btn {
+            width: 26px; height: 26px; border-radius: 50%;
+            border: 2px solid transparent; cursor: pointer;
+            transition: all 0.3s;
+        }
+        .color-btn:hover { transform: scale(1.12); }
+        .color-btn.active { border-color: white; box-shadow: 0 0 16px rgba(255,255,255,0.2); }
+        .paint-size-group { display: flex; align-items: center; gap: 6px; color: #aaa; font-size: 11px; }
+        .paint-size-group input[type="range"] { width: 60px; cursor: pointer; accent-color: #3498db; }
+        .clear-paint-btn { padding: 3px 12px; background: #e74c3c; border: none; border-radius: 10px; color: white; cursor: pointer; font-size: 11px; }
+
+        /* 调整面板 */
+        #adjust-panel {
+            position: absolute;
+            left: 16px;
+            bottom: 120px;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(10px);
+            padding: 14px 18px;
+            border-radius: 14px;
+            display: none;
+            min-width: 160px;
+            z-index: 16;
+            border: 1px solid rgba(255,255,255,0.06);
+            pointer-events: auto;
+        }
+        #adjust-panel h3 { margin: 0 0 10px 0; font-size: 14px; color: #3498db; }
+        .slider-group { margin-bottom: 10px; }
+        .slider-group label { display: block; font-size: 11px; margin-bottom: 3px; color: #aaa; }
+        .slider-group input { width: 100%; cursor: pointer; }
+        .delete-btn { width: 100%; padding: 5px; background: #e74c3c; border: none; border-radius: 6px; color: white; cursor: pointer; margin-top: 4px; font-size: 12px; }
+
+        #status {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(6px);
+            padding: 6px 20px;
+            border-radius: 30px;
+            font-size: 12px;
+            z-index: 25;
+            display: none;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        /* ===== 左下角：图片 + 对话框（核心） ===== */
+        #bottom-left-container {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            z-index: 30;
+            display: flex;
+            align-items: flex-end;
+            gap: 18px;
+            pointer-events: none;
+        }
+        #bottom-left-container > * { pointer-events: auto; }
+
+        /* 图片区域 */
+        .bottom-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .bottom-image:hover { border-color: rgba(52,152,219,0.5); }
+        .bottom-image img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .bottom-image .placeholder {
+            color: rgba(255,255,255,0.35);
+            font-size: 12px;
+            text-align: center;
+            padding: 6px;
+            line-height: 1.3;
+        }
+        .bottom-image .placeholder span { display: block; font-size: 30px; margin-bottom: 4px; }
+
+        /* 对话框 - 展示词语和意思 */
+        .dialog-box {
+            background: rgba(16, 16, 36, 0.92);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 16px 20px;
+            min-width: 200px;
+            max-width: 320px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+            color: #eef;
+            pointer-events: auto;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .dialog-box h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #7ec8f0;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dialog-box h4 .close-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.25);
+            font-size: 18px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 4px;
+        }
+        .dialog-box h4 .close-btn:hover { color: rgba(255,255,255,0.7); }
+
+        /* 词语标签行 */
+        .dialog-box .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+            margin: 6px 0 8px;
+        }
+        .dialog-box .tag {
+            background: rgba(255,255,255,0.05);
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            color: #c8d8e8;
+        }
+        .dialog-box .tag:hover {
+            background: rgba(52,152,219,0.2);
+            border-color: #3498db;
+            color: #fff;
+        }
+        .dialog-box .tag.active {
+            background: rgba(52,152,219,0.3);
+            border-color: #3498db;
+            color: #fff;
+        }
+
+        /* 意思展示区 */
+        .dialog-box .meaning-box {
+            font-size: 13px;
+            color: #e0ecf5;
+            padding: 8px 12px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 12px;
+            border-left: 3px solid #3498db;
+            min-height: 36px;
+            margin-top: 4px;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+        .dialog-box .meaning-box.empty {
+            color: #6a7a8a;
+            font-style: italic;
+        }
+
+        /* 编辑横幅 */
+        .edit-banner {
+            position: absolute;
+            top: 126px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(52, 152, 219, 0.9);
+            padding: 4px 18px;
+            border-radius: 30px;
+            font-size: 12px;
+            z-index: 22;
+            display: none;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 20px rgba(52,152,219,0.3);
+            pointer-events: auto;
+        }
+        .edit-banner.show { display: block; }
+
+        /* 保存对话框 */
+        #save-dialog {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        #save-dialog.show { display: flex; }
+        .save-dialog-content {
+            background: #2a2a4a;
+            padding: 28px 32px;
+            border-radius: 20px;
+            max-width: 420px;
+            width: 92%;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .save-dialog-content h2 { color: #3498db; margin-bottom: 14px; font-size: 20px; text-align: center; }
+        .save-dialog-content .preview { width: 100%; border-radius: 12px; margin-bottom: 14px; background: #1a1a2e; border: 2px solid rgba(255,255,255,0.08); aspect-ratio: 4/3; object-fit: contain; }
+        .save-dialog-content label { display: block; color: #aaa; font-size: 12px; margin-bottom: 3px; }
+        .save-dialog-content input, .save-dialog-content textarea {
+            width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.04); color: white; font-size: 13px; margin-bottom: 12px;
+        }
+        .save-dialog-content input:focus, .save-dialog-content textarea:focus { outline: none; border-color: #3498db; }
+        .save-dialog-content textarea { resize: vertical; min-height: 40px; font-family: inherit; }
+        .save-dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .save-dialog-actions button { padding: 6px 24px; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: bold; transition: all 0.3s; }
+        .save-dialog-actions .cancel-btn { background: rgba(255,255,255,0.06); color: #aaa; }
+        .save-dialog-actions .cancel-btn:hover { background: rgba(255,255,255,0.14); }
+        .save-dialog-actions .confirm-btn { background: #27ae60; color: white; }
+        .save-dialog-actions .confirm-btn:hover { background: #2ecc71; }
+
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000;
+        }
+        .loading-overlay.show { display: flex; }
+        .loading-overlay .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.08); border-top-color: #3498db; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-overlay .text { margin-top: 12px; color: #aaa; font-size: 13px; }
+
+        .success-toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(39,174,96,0.95); color: white; padding: 20px 36px; border-radius: 18px;
+            font-size: 20px; font-weight: bold; z-index: 3000; opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(10px); box-shadow: 0 20px 60px rgba(39,174,96,0.3); text-align: center;
+        }
+        .success-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: none; }
+        .success-toast .sub { font-size: 12px; font-weight: normal; opacity: 0.8; margin-top: 4px; }
+        .success-toast .check { font-size: 34px; display: block; margin-bottom: 4px; }
+
+        #info {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: rgba(255,255,255,0.15);
+            pointer-events: none;
+            z-index: 5;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            #toolbar { top: 10px; padding: 5px 12px; gap: 5px; }
+            #toolbar .btn, #toolbar .upload-label { font-size: 11px; padding: 3px 10px; }
+            #sampleLibrary { top: 64px; padding: 4px 10px; gap: 6px; }
+            .sample-btn { font-size: 11px; padding: 3px 10px; }
+            #pattern-panel { right: 8px; gap: 5px; padding: 5px 4px; }
+            .pattern-item { width: 34px; height: 34px; }
+            #adjust-panel { left: 8px; bottom: 100px; padding: 10px 12px; min-width: 120px; }
+            #bottom-left-container { left: 12px; bottom: 14px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .bottom-image { width: 90px; height: 90px; }
+            .dialog-box { max-width: 220px; padding: 12px 14px; }
+            .dialog-box .tag { font-size: 11px; padding: 1px 8px; }
+            #status { bottom: 70px; font-size: 11px; padding: 4px 14px; white-space: normal; }
+            #info { display: none; }
+            #paint-toolbar { top: 110px; padding: 6px 10px; gap: 6px; }
+            .paint-size-group input[type="range"] { width: 44px; }
+        }
+        @media (max-width: 480px) {
+            .nav-links a { font-size: 12px; }
+            .nav-logo span { display: none; }
+            .dialog-box { max-width: 180px; padding: 10px 12px; }
+            .dialog-box .tag { font-size: 10px; padding: 1px 6px; }
+            .bottom-image { width: 70px; height: 70px; }
+            #toolbar .btn, #toolbar .upload-label { font-size: 10px; padding: 2px 8px; }
+        }
+    </style>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo"><div class="logo-icon">青</div><span>青韵工坊</span></a>
+        <ul class="nav-links">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="create.html" class="active">开始创作</a></li>
+            <li><a href="ranking.html">排行榜</a></li>
+            <li><a href="profile.html">个人中心</a></li>
+        </ul>
+        <div class="nav-user"><span>游客</span><div class="nav-avatar">👤</div></div>
+    </nav>
+
+    <!-- 3D容器 -->
+    <div id="container">
+        <!-- 顶部工具栏 -->
+        <div id="toolbar">
+            <label for="file-input" class="upload-label">📂 上传STL</label>
+            <input type="file" id="file-input" accept=".stl">
+            <button class="btn active" id="btn-place">🎨 贴纹样</button>
+            <button class="btn" id="btn-adjust">✏️ 调整</button>
+            <button class="btn" id="btn-paint">🖌️ 画笔</button>
+            <button class="btn save-btn" id="btn-save">💾 保存</button>
+        </div>
+
+        <!-- 示例模型 -->
+        <div id="sampleLibrary">
+            <button class="sample-btn" data-model="vase">🏺 玉壶春瓶</button>
+            <button class="sample-btn" data-model="meiping">🍶 梅瓶</button>
+            <button class="sample-btn" data-model="bowl">🥣 敞口碗</button>
+            <button class="sample-btn" data-model="plate">🍽️ 青花盘</button>
+        </div>
+
+        <!-- 画笔工具栏 -->
+        <div id="paint-toolbar">
+            <div style="display:flex; gap:3px; align-items:center;">
+                <span style="font-size:10px; color:#aaa; margin-right:2px;">🎨</span>
+                <button class="color-btn active" style="background:#1a4b8c;" data-color="#1a4b8c"></button>
+                <button class="color-btn" style="background:#c0392b;" data-color="#c0392b"></button>
+                <button class="color-btn" style="background:#27ae60;" data-color="#27ae60"></button>
+                <button class="color-btn" style="background:#d4a017;" data-color="#d4a017"></button>
+                <button class="color-btn" style="background:#8e44ad;" data-color="#8e44ad"></button>
+                <button class="color-btn" style="background:#e67e22;" data-color="#e67e22"></button>
+                <button class="color-btn" style="background:#ffffff; border-color:#555;" data-color="#ffffff"></button>
+            </div>
+            <div class="paint-size-group">
+                <span>✏️</span>
+                <input type="range" id="paint-size" min="0.5" max="15" step="0.5" value="4">
+                <span id="size-label">4</span>
+            </div>
+            <button class="clear-paint-btn" id="clear-paint">🗑️</button>
+        </div>
+
+        <!-- 右侧纹样面板 -->
+        <div id="pattern-panel"></div>
+
+        <!-- 调整面板 -->
+        <div id="adjust-panel">
+            <h3>纹样调整</h3>
+            <div class="slider-group">
+                <label>大小: <span id="scale-val">1.0</span></label>
+                <input type="range" id="scale-slider" min="0.2" max="3" step="0.1" value="1">
+            </div>
+            <div class="slider-group">
+                <label>旋转: <span id="rotate-val">0°</span></label>
+                <input type="range" id="rotate-slider" min="0" max="360" step="1" value="0">
+            </div>
+            <button class="delete-btn" id="delete-decal">🗑️ 删除</button>
+        </div>
+
+        <!-- 状态 -->
+        <div id="status"></div>
+
+        <!-- 编辑横幅 -->
+        <div class="edit-banner" id="editBanner">
+            ✏️ 编辑: <span id="editTitle">作品</span>
+            <button onclick="cancelEdit()" style="margin-left:8px;background:rgba(255,255,255,0.12);border:none;color:white;padding:1px 12px;border-radius:30px;cursor:pointer;font-size:12px;">取消</button>
+        </div>
+
+        <!-- ===== 左下角：图片 + 对话框 ===== -->
+        <div id="bottom-left-container">
+            <!-- 图片 -->
+            <div class="bottom-image" id="bottomImage">
+                <img id="bottomImg" src="qinghua.png" alt="qinghua" style="display:block;">
+                <div class="placeholder" id="imgPlaceholder" style="display:none;">
+                    <span>🖼️</span>
+                    上传图片<br><small>qinghua.png</small>
+                </div>
+            </div>
+
+            <!-- 对话框 -->
+            <div class="dialog-box" id="dialogBox">
+                <h4>
+                    <span>🏺 青花 · 典藏</span>
+                    <button class="close-btn" id="closeDialogBtn">✕</button>
+                </h4>
+                <!-- 第一行：模型词语 -->
+                <div class="tag-row" id="modelRow">
+                    <span class="tag active" data-type="model" data-key="玉壶春瓶">玉壶春瓶</span>
+                    <span class="tag" data-type="model" data-key="梅瓶">梅瓶</span>
+                    <span class="tag" data-type="model" data-key="敞口碗">敞口碗</span>
+                    <span class="tag" data-type="model" data-key="青花盘">青花盘</span>
+                </div>
+                <!-- 第二行：纹样词语 -->
+                <div class="tag-row" id="patternRow">
+                    <span class="tag active" data-type="pattern" data-key="花卉纹">花卉纹</span>
+                    <span class="tag" data-type="pattern" data-key="回（雷）纹">回纹</span>
+                    <span class="tag" data-type="pattern" data-key="祥云纹">祥云</span>
+                    <span class="tag" data-type="pattern" data-key="缠枝莲纹">缠枝莲</span>
+                    <span class="tag" data-type="pattern" data-key="山纹">山纹</span>
+                    <span class="tag" data-type="pattern" data-key="福字纹">福字</span>
+                    <span class="tag" data-type="pattern" data-key="双鱼纹">双鱼</span>
+                </div>
+                <!-- 意思展示 -->
+                <div class="meaning-box" id="meaningBox">🌸 花卉纹：寓意富贵吉祥，柔美婉约。</div>
+            </div>
+        </div>
+
+        <div id="info">左键旋转 · 右键平移 · 滚轮缩放 · 1贴纹样 2调整 3画笔</div>
+    </div>
+
+    <!-- 保存对话框 -->
+    <div id="save-dialog">
+        <div class="save-dialog-content">
+            <h2>💾 保存作品</h2>
+            <img class="preview" id="save-preview" alt="预览">
+            <label>作品名称</label>
+            <input type="text" id="save-title" placeholder="名称..." value="我的青花创作">
+            <label>描述</label>
+            <textarea id="save-desc" placeholder="描述..."></textarea>
+            <div class="save-dialog-actions">
+                <button class="cancel-btn" id="save-cancel">取消</button>
+                <button class="confirm-btn" id="save-confirm">✅ 确认保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="spinner"></div>
+            <div class="text" id="loadingText">⏳ 处理中...</div>
+        </div>
+    </div>
+
+    <!-- 成功 -->
+    <div class="success-toast" id="successToast">
+        <span class="check">✅</span> 保存成功！
+        <div class="sub" id="successTitle">已保存</div>
+    </div>
+
+    <!-- ============================================================ -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+        import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // ========== 场景 ==========
+        const container = document.getElementById('container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 5000);
+        camera.position.set(0, 30, 80);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.prepend(renderer.domElement);
+
+        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambient);
+        const d1 = new THREE.DirectionalLight(0xffffff, 1.0);
+        d1.position.set(100, 200, 100);
+        d1.castShadow = true;
+        scene.add(d1);
+        const d2 = new THREE.DirectionalLight(0xaaccff, 0.5);
+        d2.position.set(-100, 100, -100);
+        scene.add(d2);
+        const grid = new THREE.GridHelper(200, 40, 0x444466, 0x222244);
+        scene.add(grid);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.minDistance = 10;
+        controls.maxDistance = 300;
+
+        // ========== 状态 ==========
+        let vaseMesh = null;
+        let decals = [];
+        let selectedDecal = null;
+        let currentMode = 'place';
+        let selectedPatternIndex = 0;
+        let currentModelName = null;
+        let isEditMode = false;
+        let editingWorkId = null;
+        const exportGroup = new THREE.Group();
+        scene.add(exportGroup);
+
+        let paintColor = '#1a4b8c';
+        let paintSize = 4;
+        let isPainting = false;
+        let paintPoints = [];
+        let lastPaintPos = null;
+
+        let isSaving = false;
+        let toastTimer = null;
+        let saveSuccess = false;
+        const exporter = new GLTFExporter();
+        const gltfLoader = new GLTFLoader();
+
+        // ========== IndexedDB ==========
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('QingyunWorksDB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('works')) db.createObjectStore('works', { keyPath: 'id' });
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        async function getWorkFromIndexedDB(id) {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(['works'], 'readonly');
+                const store = tx.objectStore('works');
+                const work = await new Promise((r) => { const req = store.get(id); req.onsuccess = () => r(req.result); req.onerror = () => r(null); });
+                db.close();
+                return work;
+            } catch { return null; }
+        }
+        async function saveWorkToIndexedDB(work) {
+            try {
+                const db = await openDB();
+                const tx = db.transaction(['works'], 'readwrite');
+                const store = tx.objectStore('works');
+                if (work.id) { try { store.delete(work.id); } catch {} }
+                store.add(work);
+                await new Promise((r, rej) => { tx.oncomplete = r; tx.onerror = () => rej(tx.error); });
+                db.close();
+                return true;
+            } catch { return false; }
+        }
+
+        function showLoading(text) { document.getElementById('loadingText').textContent = text; document.getElementById('loadingOverlay').classList.add('show'); }
+        function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+        function showStatus(msg, duration = 3000) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.style.display = 'block';
+            if (duration > 0) setTimeout(() => { el.style.display = 'none'; }, duration);
+        }
+        function showSuccessToast(title) {
+            if (toastTimer) clearTimeout(toastTimer);
+            const toast = document.getElementById('successToast');
+            document.getElementById('successTitle').textContent = `「${title}」已保存`;
+            toast.classList.add('show');
+            toastTimer = setTimeout(() => { toast.classList.remove('show'); toastTimer = null; }, 2800);
+        }
+
+        // ========== 纹样 (龙纹 → 山纹) ==========
+        const patternSVGs = [
+            // 0: 花卉纹
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><circle cx='64' cy='64' r='10' fill='#1a4b8c'/><ellipse cx='64' cy='36' rx='8' ry='16' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><ellipse cx='64' cy='92' rx='8' ry='16' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><ellipse cx='36' cy='64' rx='16' ry='8' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><ellipse cx='92' cy='64' rx='16' ry='8' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><ellipse cx='44' cy='44' rx='6' ry='12' fill='none' stroke='#1a4b8c' stroke-width='2' transform='rotate(45,44,44)'/><ellipse cx='84' cy='44' rx='6' ry='12' fill='none' stroke='#1a4b8c' stroke-width='2' transform='rotate(-45,84,44)'/><ellipse cx='44' cy='84' rx='6' ry='12' fill='none' stroke='#1a4b8c' stroke-width='2' transform='rotate(-45,44,84)'/><ellipse cx='84' cy='84' rx='6' ry='12' fill='none' stroke='#1a4b8c' stroke-width='2' transform='rotate(45,84,84)'/></svg>`,
+            // 1: 回纹
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><path d='M20 20H108V108H20Z' fill='none' stroke='#1a4b8c' stroke-width='3'/><path d='M36 36H92V92H36Z' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><rect x='56' y='56' width='16' height='16' fill='#1a4b8c'/><path d='M52 52L76 52L76 76L52 76Z' fill='none' stroke='#1a4b8c' stroke-width='2'/><path d='M52 36L52 52' stroke='#1a4b8c' stroke-width='2'/><path d='M76 36L76 52' stroke='#1a4b8c' stroke-width='2'/><path d='M52 76L52 92' stroke='#1a4b8c' stroke-width='2'/><path d='M76 76L76 92' stroke='#1a4b8c' stroke-width='2'/><path d='M36 52L52 52' stroke='#1a4b8c' stroke-width='2'/><path d='M36 76L52 76' stroke='#1a4b8c' stroke-width='2'/><path d='M76 52L92 52' stroke='#1a4b8c' stroke-width='2'/><path d='M76 76L92 76' stroke='#1a4b8c' stroke-width='2'/></svg>`,
+            // 2: 祥云纹
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><path d='M28 88Q28 48 56 48Q56 20 84 20Q112 20 112 56Q112 88 84 88Z' fill='none' stroke='#1a4b8c' stroke-width='3'/><path d='M36 72Q36 44 60 44Q60 28 80 28Q100 28 100 56Q100 72 80 72Z' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><circle cx='44' cy='96' r='8' fill='none' stroke='#1a4b8c' stroke-width='2.5'/><circle cx='96' cy='96' r='6' fill='none' stroke='#1a4b8c' stroke-width='2'/><circle cx='60' cy='96' r='5' fill='none' stroke='#1a4b8c' stroke-width='2'/><circle cx='80' cy='96' r='5' fill='none' stroke='#1a4b8c' stroke-width='2'/><path d='M44 88L44 80' stroke='#1a4b8c' stroke-width='2'/><path d='M96 90L96 84' stroke='#1a4b8c' stroke-width='2'/></svg>`,
+            // 3: 缠枝莲纹 (精细化)
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'>
+                <defs><style> .s { stroke:#1a4b8c; fill:none; stroke-width:2.2; stroke-linecap:round; } .s2 { stroke:#1a4b8c; fill:none; stroke-width:1.8; } .f { fill:#1a4b8c; } </style></defs>
+                <path class='s' d='M20 64 Q40 40 64 64 Q88 88 108 64'/>
+                <path class='s' d='M20 64 Q40 88 64 64 Q88 40 108 64'/>
+                <path class='s' d='M48 48 Q40 36 44 28 Q48 36 48 48'/>
+                <path class='s' d='M48 48 Q56 36 52 28 Q48 36 48 48'/>
+                <path class='s' d='M48 48 Q40 56 32 52 Q40 48 48 48'/>
+                <path class='s' d='M48 48 Q56 56 64 52 Q56 48 48 48'/>
+                <circle cx='48' cy='48' r='4' class='f'/>
+                <path class='s' d='M80 80 Q72 68 68 76 Q76 80 80 80'/>
+                <path class='s' d='M80 80 Q88 68 92 76 Q84 80 80 80'/>
+                <path class='s' d='M80 80 Q72 92 68 88 Q76 84 80 80'/>
+                <path class='s' d='M80 80 Q88 92 92 88 Q84 84 80 80'/>
+                <circle cx='80' cy='80' r='4' class='f'/>
+                <path class='s' d='M64 32 Q56 24 52 32 Q60 36 64 32'/>
+                <path class='s' d='M64 32 Q72 24 76 32 Q68 36 64 32'/>
+                <path class='s' d='M64 32 Q56 40 52 36 Q60 32 64 32'/>
+                <path class='s' d='M64 32 Q72 40 76 36 Q68 32 64 32'/>
+                <circle cx='64' cy='32' r='3' class='f'/>
+                <path class='s2' d='M32 56 Q28 50 24 56 Q28 60 32 56'/>
+                <path class='s2' d='M96 56 Q100 50 104 56 Q100 60 96 56'/>
+                <path class='s2' d='M40 72 Q36 66 32 72 Q36 76 40 72'/>
+                <path class='s2' d='M88 72 Q92 66 96 72 Q92 76 88 72'/>
+            </svg>`,
+            // 4: 山纹 (替代龙纹)
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'>
+                <defs><style> .s { stroke:#1a4b8c; fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; } .s2 { stroke:#1a4b8c; fill:none; stroke-width:1.6; } .f { fill:#1a4b8c; } </style></defs>
+                <!-- 主峰 -->
+                <path class='s' d='M24 88 L48 40 L72 88'/>
+                <path class='s' d='M48 40 L56 28 L72 88'/>
+                <!-- 远山 -->
+                <path class='s' d='M16 88 L32 60 L48 88'/>
+                <path class='s' d='M72 88 L92 52 L112 88'/>
+                <!-- 山峦叠嶂 -->
+                <path class='s2' d='M32 88 L44 68 L56 88'/>
+                <path class='s2' d='M64 88 L78 64 L92 88'/>
+                <!-- 水波纹 (山下) -->
+                <path class='s2' d='M20 96 Q30 90 40 96 Q50 102 60 96 Q70 90 80 96 Q90 102 100 96 Q110 90 116 96'/>
+                <path class='s2' d='M20 104 Q30 98 40 104 Q50 110 60 104 Q70 98 80 104 Q90 110 100 104 Q110 98 116 104'/>
+                <!-- 云气 -->
+                <path class='s2' d='M36 24 Q32 18 28 24 Q32 30 36 24'/>
+                <path class='s2' d='M44 20 Q40 14 36 20 Q40 26 44 20'/>
+                <path class='s2' d='M84 20 Q80 14 76 20 Q80 26 84 20'/>
+                <path class='s2' d='M92 24 Q88 18 84 24 Q88 30 92 24'/>
+            </svg>`,
+            // 5: 福字纹
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><rect x='20' y='20' width='88' height='88' fill='none' stroke='#1a4b8c' stroke-width='3' rx='4'/><rect x='32' y='32' width='64' height='64' fill='none' stroke='#1a4b8c' stroke-width='2' rx='2'/><text x='64' y='84' text-anchor='middle' font-size='52' font-family='serif' fill='#1a4b8c' font-weight='bold'>福</text><circle cx='64' cy='64' r='8' fill='none' stroke='#1a4b8c' stroke-width='1.5'/></svg>`,
+            // 6: 双鱼纹
+            `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'><ellipse cx='44' cy='64' rx='16' ry='28' fill='none' stroke='#1a4b8c' stroke-width='2.5' transform='rotate(-20,44,64)'/><ellipse cx='84' cy='64' rx='16' ry='28' fill='none' stroke='#1a4b8c' stroke-width='2.5' transform='rotate(20,84,64)'/><circle cx='38' cy='48' r='3' fill='#1a4b8c'/><circle cx='90' cy='48' r='3' fill='#1a4b8c'/><path d='M28 64L44 64' stroke='#1a4b8c' stroke-width='2'/><path d='M84 64L100 64' stroke='#1a4b8c' stroke-width='2'/><ellipse cx='64' cy='96' rx='12' ry='6' fill='#1a4b8c' opacity='0.3'/><circle cx='44' cy='80' r='3' fill='#1a4b8c' opacity='0.5'/><circle cx='84' cy='80' r='3' fill='#1a4b8c' opacity='0.5'/></svg>`
+        ];
+
+        const patternTextures = patternSVGs.map(svg => {
+            const img = new Image();
+            img.src = 'data:image/svg+xml,' + encodeURIComponent(svg);
+            const tex = new THREE.Texture(img);
+            tex.needsUpdate = true;
+            tex.premultipliedAlpha = true;
+            return tex;
+        });
+
+        // 右侧纹样面板
+        const panel = document.getElementById('pattern-panel');
+        patternSVGs.forEach((svg, idx) => {
+            const div = document.createElement('div');
+            div.className = `pattern-item ${idx === 0 ? 'selected' : ''}`;
+            div.innerHTML = `<img src="data:image/svg+xml,${encodeURIComponent(svg)}">`;
+            div.onclick = () => {
+                document.querySelectorAll('.pattern-item').forEach(d => d.classList.remove('selected'));
+                div.classList.add('selected');
+                selectedPatternIndex = idx;
+                switchMode('place');
+                // 同步对话框纹样高亮
+                document.querySelectorAll('#patternRow .tag').forEach(t => t.classList.remove('active'));
+                const tags = document.querySelectorAll('#patternRow .tag');
+                if (tags[idx]) tags[idx].classList.add('active');
+                updateMeaning('pattern', idx);
+            };
+            panel.appendChild(div);
+        });
+
+        // ========== STL 加载 ==========
+        const stlLoader = new STLLoader();
+
+        function loadModelFromGeometry(geometry, name) {
+            while (exportGroup.children.length) { const c = exportGroup.children[0]; exportGroup.remove(c); if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); }
+            if (vaseMesh) { scene.remove(vaseMesh); vaseMesh.geometry.dispose(); vaseMesh.material.dispose(); }
+            decals.forEach(d => { scene.remove(d.mesh); d.mesh.geometry.dispose(); d.mesh.material.dispose(); });
+            decals = []; selectedDecal = null;
+            currentModelName = name;
+            paintPoints.forEach(p => { scene.remove(p); p.geometry.dispose(); p.material.dispose(); });
+            paintPoints = []; lastPaintPos = null;
+            updateAdjustPanel();
+
+            geometry.computeVertexNormals();
+            geometry.center();
+            const temp = new THREE.Mesh(geometry);
+            const box = new THREE.Box3().setFromObject(temp);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const targetSize = 60;
+            const scale = (maxDim > 0 && isFinite(maxDim)) ? targetSize / maxDim : 1;
+            geometry.scale(scale, scale, scale);
+
+            const mat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.3, metalness: 0.05, side: THREE.DoubleSide });
+            vaseMesh = new THREE.Mesh(geometry, mat);
+            vaseMesh.castShadow = true;
+            vaseMesh.receiveShadow = true;
+            vaseMesh.name = 'vase_mesh';
+            scene.add(vaseMesh);
+            exportGroup.add(vaseMesh.clone());
+            vaseMesh.updateMatrixWorld(true);
+
+            const fb = new THREE.Box3().setFromObject(vaseMesh);
+            const center = fb.getCenter(new THREE.Vector3());
+            const fs = fb.getSize(new THREE.Vector3());
+            const mf = Math.max(fs.x, fs.y, fs.z);
+            controls.target.copy(center);
+            const dist = mf * 2.5;
+            camera.position.set(center.x + dist * 0.5, center.y + dist * 0.4, center.z + dist);
+            camera.lookAt(center);
+            controls.update();
+            showStatus(`✅ 加载: ${name}`, 2000);
+        }
+
+        function loadSampleModel(modelName) {
+            const url = `/models/${modelName}.stl`;
+            showStatus(`⏳ 加载 ${modelName} ...`, 0);
+            document.querySelectorAll('.sample-btn').forEach(b => b.classList.add('loading'));
+            fetch(url).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
+                .then(buf => { const geo = stlLoader.parse(buf); loadModelFromGeometry(geo, modelName); })
+                .catch(err => { showStatus(`⚠️ 示例 "${modelName}" 不可用，请上传STL`, 4000); })
+                .finally(() => { document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('loading')); });
+        }
+
+        document.querySelectorAll('.sample-btn').forEach(b => b.addEventListener('click', function() { loadSampleModel(this.dataset.model); }));
+
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showStatus(`⏳ 加载 ${file.name} ...`, 0);
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try { const geo = stlLoader.parse(ev.target.result); loadModelFromGeometry(geo, file.name); showStatus(`✅ 加载成功: ${file.name}`, 2000); }
+                catch (err) { showStatus(`❌ 解析失败: ${err.message}`, 5000); }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // ========== 画笔 ==========
+        function drawContinuousPoints(p1, n1, p2, n2, color, size) {
+            const dist = p1.distanceTo(p2);
+            const steps = Math.max(3, Math.floor(dist / 0.3));
+            for (let i = 0; i <= steps; i++) {
+                const t = i / steps;
+                const pos = new THREE.Vector3().lerpVectors(p1, p2, t);
+                const normal = new THREE.Vector3().lerpVectors(n1, n2, t).normalize();
+                const geo = new THREE.CircleGeometry(size * 0.25, 12);
+                const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, depthTest: true });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.name = 'paint_point';
+                mesh.position.copy(pos).add(normal.clone().multiplyScalar(0.1));
+                mesh.lookAt(mesh.position.clone().add(normal));
+                scene.add(mesh);
+                paintPoints.push(mesh);
+            }
+        }
+
+        function paintAtIntersection(intersection) {
+            if (!vaseMesh || !intersection) return;
+            const point = intersection.point.clone();
+            const normal = intersection.face.normal.clone().transformDirection(vaseMesh.matrixWorld).normalize();
+            if (!lastPaintPos) {
+                const geo = new THREE.CircleGeometry(paintSize * 0.25, 12);
+                const mat = new THREE.MeshBasicMaterial({ color: paintColor, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, depthTest: true });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.name = 'paint_point';
+                mesh.position.copy(point).add(normal.clone().multiplyScalar(0.1));
+                mesh.lookAt(mesh.position.clone().add(normal));
+                scene.add(mesh);
+                paintPoints.push(mesh);
+                lastPaintPos = { point: point.clone(), normal: normal.clone() };
+                return;
+            }
+            const dist = point.distanceTo(lastPaintPos.point);
+            if (dist > 0.05) {
+                drawContinuousPoints(lastPaintPos.point, lastPaintPos.normal, point, normal, paintColor, paintSize);
+            } else {
+                const geo = new THREE.CircleGeometry(paintSize * 0.25, 12);
+                const mat = new THREE.MeshBasicMaterial({ color: paintColor, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false, depthTest: true });
+                const mesh = new THREE.Mesh(geo, mat);
+                mesh.name = 'paint_point';
+                mesh.position.copy(point).add(normal.clone().multiplyScalar(0.1));
+                mesh.lookAt(mesh.position.clone().add(normal));
+                scene.add(mesh);
+                paintPoints.push(mesh);
+            }
+            lastPaintPos = { point: point.clone(), normal: normal.clone() };
+        }
+
+        function startPaint(intersection) { if (!vaseMesh) return; isPainting = true; lastPaintPos = null; controls.enabled = false; paintAtIntersection(intersection); }
+        function continuePaint(intersection) { if (!isPainting || !vaseMesh) return; paintAtIntersection(intersection); }
+        function endPaint() { isPainting = false; lastPaintPos = null; controls.enabled = true; }
+        function clearPaint() { paintPoints.forEach(p => { scene.remove(p); p.geometry.dispose(); p.material.dispose(); }); paintPoints = []; lastPaintPos = null; showStatus('🗑️ 清除画笔', 1500); }
+
+        // ========== 鼠标 ==========
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let hoveredDecal = null;
+
+        renderer.domElement.addEventListener('pointermove', (e) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            if (currentMode === 'paint' && isPainting && vaseMesh) {
+                const hits = raycaster.intersectObject(vaseMesh);
+                if (hits.length) continuePaint(hits[0]);
+                return;
+            }
+            if (currentMode === 'adjust' && decals.length) {
+                const meshes = decals.map(d => d.mesh);
+                const hits = raycaster.intersectObjects(meshes, false);
+                if (hits.length) {
+                    const hit = hits[0].object;
+                    if (hoveredDecal !== hit) {
+                        if (hoveredDecal) { hoveredDecal.material.opacity = 0.7; hoveredDecal.material.color.setHex(0xffffff); }
+                        hoveredDecal = hit;
+                        hoveredDecal.material.opacity = 1.0;
+                        hoveredDecal.material.color.setHex(0x88ccff);
+                        renderer.domElement.style.cursor = 'pointer';
+                    }
+                } else {
+                    if (hoveredDecal) { hoveredDecal.material.opacity = 0.7; hoveredDecal.material.color.setHex(0xffffff); hoveredDecal = null; }
+                    renderer.domElement.style.cursor = 'default';
+                }
+            } else {
+                if (hoveredDecal) { hoveredDecal.material.opacity = 0.7; hoveredDecal.material.color.setHex(0xffffff); hoveredDecal = null; }
+                renderer.domElement.style.cursor = currentMode === 'paint' ? 'crosshair' : 'default';
+            }
+        });
+
+        renderer.domElement.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) return;
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            if (currentMode === 'paint' && vaseMesh) {
+                const hits = raycaster.intersectObject(vaseMesh);
+                if (hits.length) { startPaint(hits[0]); showStatus('🖌️ 绘画中...', 0); }
+                return;
+            }
+            if (currentMode === 'place' && vaseMesh) {
+                const hits = raycaster.intersectObject(vaseMesh);
+                if (hits.length) { placeDecal(hits[0]); showStatus('🎨 纹样已贴', 1500); }
+                return;
+            }
+            if (currentMode === 'adjust') {
+                const meshes = decals.map(d => d.mesh);
+                if (meshes.length) {
+                    let hits = raycaster.intersectObjects(meshes, false);
+                    if (!hits.length) {
+                        for (const decal of decals) {
+                            const box = new THREE.Box3().setFromObject(decal.mesh);
+                            const center = new THREE.Vector3(); box.getCenter(center);
+                            const size = new THREE.Vector3(); box.getSize(size);
+                            const radius = Math.max(size.x, size.y, size.z) * 0.9;
+                            const ray = raycaster.ray;
+                            const toCenter = new THREE.Vector3().copy(center).sub(ray.origin);
+                            const t = toCenter.dot(ray.direction);
+                            if (t > 0) {
+                                const cp = new THREE.Vector3().copy(ray.origin).add(ray.direction.clone().multiplyScalar(t));
+                                if (cp.distanceTo(center) < radius) { hits = [{ object: decal.mesh }]; break; }
+                            }
+                        }
+                    }
+                    if (hits.length) { selectDecalByMesh(hits[0].object); renderer.domElement.style.cursor = 'pointer'; }
+                    else { deselectDecal(); renderer.domElement.style.cursor = 'default'; }
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('pointerup', () => { if (currentMode === 'paint' && isPainting) { endPaint(); showStatus('✅ 绘画完成', 1500); } });
+        renderer.domElement.addEventListener('pointerleave', () => { if (currentMode === 'paint' && isPainting) { endPaint(); showStatus('✅ 绘画完成', 1500); } });
+
+        // ========== 贴花 ==========
+        function placeDecal(intersection) {
+            vaseMesh.updateMatrixWorld(true);
+            const point = intersection.point;
+            const normal = intersection.face.normal.clone().transformDirection(vaseMesh.matrixWorld);
+            const tex = patternTextures[selectedPatternIndex];
+            const geo = new THREE.PlaneGeometry(8, 8);
+            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false, depthTest: true, opacity: 0.9, color: 0xffffff, premultipliedAlpha: true });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.name = 'decal';
+            mesh.userData.patternIndex = selectedPatternIndex;
+            mesh.position.copy(point).add(normal.clone().multiplyScalar(0.2));
+            mesh.lookAt(mesh.position.clone().add(normal));
+            scene.add(mesh);
+            const edges = new THREE.EdgesGeometry(geo);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x00ccff, visible: false, transparent: true, opacity: 0.8 });
+            const outline = new THREE.LineSegments(edges, lineMat);
+            outline.scale.set(1.05, 1.05, 1.05);
+            mesh.add(outline);
+            decals.push({ mesh, outline, patternIndex: selectedPatternIndex });
+            if (hoveredDecal) hoveredDecal = null;
+        }
+
+        function selectDecalByMesh(mesh) {
+            deselectDecal();
+            const obj = decals.find(d => d.mesh === mesh);
+            if (obj) {
+                selectedDecal = obj;
+                obj.outline.material.visible = true;
+                obj.mesh.material.opacity = 1.0;
+                obj.mesh.material.color.setHex(0x88ddff);
+                updateAdjustPanel();
+                showStatus('✅ 选中纹样', 1500);
+            }
+        }
+
+        function deselectDecal() {
+            if (selectedDecal) {
+                selectedDecal.outline.material.visible = false;
+                selectedDecal.mesh.material.opacity = 0.9;
+                selectedDecal.mesh.material.color.setHex(0xffffff);
+                selectedDecal = null;
+            }
+            updateAdjustPanel();
+        }
+
+        // ========== 导出 ==========
+        function captureScreenshot() { try { renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); } catch { return null; } }
+
+        function exportGLB() {
+            return new Promise((resolve, reject) => {
+                try {
+                    const es = new THREE.Scene();
+                    if (vaseMesh) { const c = vaseMesh.clone(); c.updateMatrixWorld(true); es.add(c); } else { reject(new Error('无模型')); return; }
+                    decals.forEach(d => { if (d.mesh) { const c = d.mesh.clone(); c.updateMatrixWorld(true); es.add(c); } });
+                    paintPoints.forEach(p => { if (p) { const c = p.clone(); c.updateMatrixWorld(true); es.add(c); } });
+                    const l1 = new THREE.DirectionalLight(0xffffff, 1.0); l1.position.set(100,200,100); es.add(l1);
+                    const l2 = new THREE.DirectionalLight(0xaaccff, 0.5); l2.position.set(-100,100,-100); es.add(l2);
+                    es.add(new THREE.AmbientLight(0xffffff, 0.8));
+                    const to = setTimeout(() => reject(new Error('超时')), 10000);
+                    exporter.parse(es, (glb) => { clearTimeout(to); resolve({ blob: new Blob([glb], { type: 'application/octet-stream' }), data: glb }); },
+                        (err) => { clearTimeout(to); reject(err); }, { binary: true });
+                } catch (e) { reject(e); }
+            });
+        }
+
+        // ========== 保存 ==========
+        async function saveWorkToDB(title, description, imageData, glbData) {
+            let compressedImage = imageData;
+            if (imageData && imageData.length > 100000) {
+                const img = new Image(); img.src = imageData; await new Promise(r => { img.onload = r; });
+                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                canvas.width = 400; canvas.height = 300;
+                ctx.drawImage(img, 0, 0, 400, 300);
+                compressedImage = canvas.toDataURL('image/jpeg', 0.7);
+            }
+            let compressedGlb = glbData || '';
+            if (compressedGlb && compressedGlb.length > 20000000) { compressedGlb = ''; }
+            const workId = isEditMode && editingWorkId ? editingWorkId : Date.now();
+            const decalData = decals.map(d => ({
+                position: d.mesh.position.toArray(),
+                rotation: [d.mesh.rotation.x, d.mesh.rotation.y, d.mesh.rotation.z],
+                scale: d.mesh.scale.x,
+                patternIndex: d.patternIndex || 0
+            }));
+            const work = {
+                id: workId, title: title || '未命名', description: description || '',
+                image: compressedImage, model: currentModelName || '未知',
+                decals: decals.length, paintPoints: paintPoints.length,
+                glbData: compressedGlb, glbSize: compressedGlb ? Math.round(compressedGlb.length * 0.75) : 0,
+                decalData: decalData,
+                createdAt: isEditMode ? undefined : new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                isBeautified: false, likes: 0
+            };
+            const ok = await saveWorkToIndexedDB(work);
+            if (!ok) throw new Error('IndexedDB 保存失败');
+            if (isEditMode) {
+                const url = new URL(window.location);
+                url.searchParams.delete('edit');
+                window.history.replaceState({}, '', url);
+                isEditMode = false; editingWorkId = null;
+                document.getElementById('editBanner').classList.remove('show');
+                document.title = '青韵工坊 · 纹样创作';
+            }
+            return work;
+        }
+
+        function showSaveDialog() {
+            if (isSaving) { showStatus('⏳ 保存中...', 2000); return; }
+            if (saveSuccess) { showStatus('✅ 已保存', 2000); return; }
+            if (!vaseMesh) { showStatus('⚠️ 请加载模型', 3000); return; }
+            const dialog = document.getElementById('save-dialog');
+            if (dialog.classList.contains('show')) return;
+            const preview = document.getElementById('save-preview');
+            const titleInput = document.getElementById('save-title');
+            const descInput = document.getElementById('save-desc');
+            document.getElementById('save-confirm').disabled = false;
+            document.getElementById('save-cancel').disabled = false;
+            document.querySelector('.save-dialog-content h2').textContent = isEditMode ? '✏️ 更新作品' : '💾 保存作品';
+            showLoading('📸 预览...');
+            setTimeout(() => {
+                try {
+                    renderer.render(scene, camera);
+                    const img = renderer.domElement.toDataURL('image/png');
+                    preview.src = img;
+                    const dateStr = new Date().toLocaleString('zh-CN');
+                    titleInput.value = isEditMode ? `青花 (更新 ${dateStr})` : `青花 ${dateStr}`;
+                    descInput.value = `模型 ${currentModelName || '未知'}，纹样 ${decals.length} 个，画笔 ${paintPoints.length} 笔`;
+                    window._cachedImageData = img;
+                    dialog.classList.add('show');
+                    hideLoading();
+                } catch (e) { hideLoading(); showStatus('❌ 预览失败', 3000); }
+            }, 200);
+        }
+
+        function closeSaveDialog(showCancel = true) {
+            if (isSaving) { showStatus('⏳ 保存中...', 2000); return; }
+            document.getElementById('save-dialog').classList.remove('show');
+            if (showCancel && !saveSuccess) showStatus('已取消', 1500);
+            document.getElementById('save-confirm').disabled = false;
+            document.getElementById('save-cancel').disabled = false;
+            if (!saveSuccess) window._cachedImageData = null;
+        }
+
+        async function confirmSave() {
+            if (isSaving || saveSuccess) return;
+            const title = document.getElementById('save-title').value.trim() || '未命名';
+            const description = document.getElementById('save-desc').value.trim();
+            const imageData = window._cachedImageData || captureScreenshot();
+            if (!imageData) { showStatus('❌ 截图失败', 3000); return; }
+            document.getElementById('save-dialog').classList.remove('show');
+            isSaving = true; saveSuccess = false;
+            const confirmBtn = document.getElementById('save-confirm');
+            const cancelBtn = document.getElementById('save-cancel');
+            confirmBtn.disabled = true; cancelBtn.disabled = true;
+            confirmBtn.textContent = '⏳ 导出...';
+            showLoading('📦 导出GLB...');
+            try {
+                let glbBase64 = '';
+                try {
+                    const result = await exportGLB();
+                    const bytes = new Uint8Array(result.data);
+                    let binary = '';
+                    const chunk = 8192;
+                    for (let i = 0; i < bytes.length; i += chunk) {
+                        binary += String.fromCharCode.apply(null, bytes.slice(i, i + chunk));
+                    }
+                    glbBase64 = btoa(binary);
+                } catch (glbErr) { console.warn('GLB导出跳过', glbErr); }
+                showLoading('💾 保存...');
+                const work = await saveWorkToDB(title, description, imageData, glbBase64);
+                saveSuccess = true;
+                window._cachedImageData = null;
+                hideLoading();
+                showSuccessToast(title);
+                isSaving = false;
+                confirmBtn.disabled = false; cancelBtn.disabled = false;
+                confirmBtn.textContent = '✅ 确认保存';
+                setTimeout(() => { saveSuccess = false; }, 3000);
+            } catch (error) {
+                console.error('保存失败:', error);
+                hideLoading();
+                showStatus('❌ 保存失败: ' + error.message, 4000);
+                isSaving = false; saveSuccess = false;
+                confirmBtn.disabled = false; cancelBtn.disabled = false;
+                confirmBtn.textContent = '✅ 确认保存';
+            }
+        }
+
+        // ========== 模式切换 ==========
+        function switchMode(mode) {
+            if (isPainting) endPaint();
+            currentMode = mode;
+            document.getElementById('btn-place').classList.toggle('active', mode === 'place');
+            document.getElementById('btn-adjust').classList.toggle('active', mode === 'adjust');
+            document.getElementById('btn-paint').classList.toggle('active', mode === 'paint');
+            document.getElementById('btn-paint').classList.toggle('paint-active', mode === 'paint');
+            document.getElementById('paint-toolbar').classList.toggle('show', mode === 'paint');
+            if (mode !== 'adjust') document.getElementById('adjust-panel').style.display = 'none';
+            deselectDecal();
+            if (hoveredDecal) { hoveredDecal.material.opacity = 0.7; hoveredDecal.material.color.setHex(0xffffff); hoveredDecal = null; }
+            controls.enabled = (mode !== 'paint');
+            renderer.domElement.style.cursor = mode === 'paint' ? 'crosshair' : 'default';
+            if (mode === 'paint') showStatus('🖌️ 画笔模式：在模型表面拖动画画', 2500);
+            else if (mode === 'place') showStatus('🎨 贴纹样模式：点击模型表面贴花', 2000);
+            else if (mode === 'adjust') showStatus(decals.length ? '✏️ 调整模式：点击纹样选中' : '💡 请先添加纹样', 2000);
+        }
+
+        document.getElementById('btn-place').onclick = () => switchMode('place');
+        document.getElementById('btn-adjust').onclick = () => switchMode('adjust');
+        document.getElementById('btn-paint').onclick = () => switchMode('paint');
+
+        document.querySelectorAll('.color-btn').forEach(b => {
+            b.onclick = () => {
+                document.querySelectorAll('.color-btn').forEach(c => c.classList.remove('active'));
+                b.classList.add('active');
+                paintColor = b.dataset.color;
+            };
+        });
+        document.getElementById('paint-size').oninput = (e) => { paintSize = parseFloat(e.target.value); document.getElementById('size-label').textContent = paintSize; };
+        document.getElementById('clear-paint').onclick = clearPaint;
+
+        function updateAdjustPanel() {
+            if (selectedDecal) {
+                document.getElementById('adjust-panel').style.display = 'block';
+                const s = selectedDecal.mesh.scale.x;
+                document.getElementById('scale-slider').value = s;
+                document.getElementById('scale-val').textContent = s.toFixed(1);
+                const rot = THREE.MathUtils.radToDeg(selectedDecal.mesh.rotation.z);
+                document.getElementById('rotate-slider').value = ((rot % 360) + 360) % 360;
+                document.getElementById('rotate-val').textContent = Math.round(((rot % 360) + 360) % 360) + '°';
+            } else {
+                document.getElementById('adjust-panel').style.display = 'none';
+            }
+        }
+
+        document.getElementById('scale-slider').oninput = (e) => {
+            if (selectedDecal) {
+                const s = parseFloat(e.target.value);
+                selectedDecal.mesh.scale.set(s, s, s);
+                document.getElementById('scale-val').textContent = s.toFixed(1);
+            }
+        };
+        document.getElementById('rotate-slider').oninput = (e) => {
+            if (selectedDecal) {
+                const deg = parseFloat(e.target.value);
+                selectedDecal.mesh.rotation.z = THREE.MathUtils.degToRad(deg);
+                document.getElementById('rotate-val').textContent = Math.round(deg) + '°';
+            }
+        };
+        document.getElementById('delete-decal').onclick = () => {
+            if (selectedDecal) {
+                scene.remove(selectedDecal.mesh);
+                selectedDecal.mesh.geometry.dispose();
+                selectedDecal.mesh.material.dispose();
+                decals = decals.filter(d => d !== selectedDecal);
+                selectedDecal = null; hoveredDecal = null;
+                updateAdjustPanel();
+                showStatus('🗑️ 纹样已删除', 1500);
+            }
+        };
+
+        document.getElementById('btn-save').addEventListener('click', (e) => { e.preventDefault(); showSaveDialog(); });
+        document.getElementById('save-cancel').addEventListener('click', (e) => { e.preventDefault(); closeSaveDialog(true); });
+        document.getElementById('save-confirm').addEventListener('click', (e) => { e.preventDefault(); confirmSave(); });
+        document.getElementById('save-dialog').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget && !isSaving && !saveSuccess) closeSaveDialog(true);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 's' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); showSaveDialog(); }
+            if (e.key === 'Enter' && document.getElementById('save-dialog').classList.contains('show')) {
+                if (e.target.tagName !== 'TEXTAREA') { e.preventDefault(); confirmSave(); }
+            }
+            if (e.key === 'Escape') {
+                if (document.getElementById('save-dialog').classList.contains('show') && !isSaving && !saveSuccess) closeSaveDialog(true);
+                if (isPainting) endPaint();
+                deselectDecal();
+            }
+            if (e.key === '1') switchMode('place');
+            if (e.key === '2') switchMode('adjust');
+            if (e.key === '3') switchMode('paint');
+            if ((e.key === 'Delete' || e.key === 'Backspace') && currentMode === 'adjust') {
+                document.getElementById('delete-decal').click();
+            }
+        });
+
+        window.cancelEdit = function() {
+            if (confirm('取消编辑？未保存将丢失。')) {
+                const url = new URL(window.location);
+                url.searchParams.delete('edit');
+                window.history.replaceState({}, '', url);
+                isEditMode = false; editingWorkId = null;
+                document.getElementById('editBanner').classList.remove('show');
+                document.title = '青韵工坊 · 纹样创作';
+                showStatus('已取消', 1500);
+                loadSampleModel('vase');
+            }
+        };
+
+        // ========== 恢复场景 ==========
+        function restoreSceneFromData(work) {
+            if (vaseMesh) { scene.remove(vaseMesh); vaseMesh.geometry?.dispose(); vaseMesh.material?.dispose(); vaseMesh = null; }
+            decals.forEach(d => { scene.remove(d.mesh); d.mesh.geometry?.dispose(); d.mesh.material?.dispose(); });
+            decals = []; selectedDecal = null;
+            paintPoints.forEach(p => { scene.remove(p); p.geometry?.dispose(); p.material?.dispose(); });
+            paintPoints = [];
+            if (work.glbData && work.glbData.length > 0) {
+                try {
+                    const bin = atob(work.glbData);
+                    const bytes = new Uint8Array(bin.length);
+                    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+                    gltfLoader.parse(bytes.buffer, '', (gltf) => {
+                        let main = null;
+                        gltf.scene.traverse((child) => {
+                            if (child.isMesh && child.name !== 'decal' && child.name !== 'paint_point') {
+                                const m = child.clone();
+                                m.material = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.3, metalness: 0.05, side: THREE.DoubleSide });
+                                scene.add(m); main = m; vaseMesh = m;
+                            }
+                        });
+                        if (main) {
+                            const box = new THREE.Box3().setFromObject(main);
+                            const center = box.getCenter(new THREE.Vector3());
+                            const size = box.getSize(new THREE.Vector3());
+                            const maxD = Math.max(size.x, size.y, size.z);
+                            if (maxD > 0 && isFinite(maxD)) {
+                                controls.target.copy(center);
+                                const dist = maxD * 2.5;
+                                camera.position.set(center.x + dist * 0.5, center.y + dist * 0.4, center.z + dist);
+                                camera.lookAt(center);
+                                controls.update();
+                            }
+                        }
+                        if (work.decalData) {
+                            work.decalData.forEach((info) => {
+                                const idx = info.patternIndex || 0;
+                                const tex = patternTextures[idx];
+                                const geo = new THREE.PlaneGeometry(8, 8);
+                                const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false, depthTest: true, opacity: 0.9, color: 0xffffff, premultipliedAlpha: true });
+                                const mesh = new THREE.Mesh(geo, mat);
+                                mesh.name = 'decal';
+                                mesh.userData.patternIndex = idx;
+                                if (info.position) mesh.position.fromArray(info.position);
+                                if (info.rotation) mesh.rotation.set(info.rotation[0], info.rotation[1], info.rotation[2]);
+                                if (info.scale) mesh.scale.set(info.scale, info.scale, info.scale);
+                                scene.add(mesh);
+                                decals.push({ mesh, outline: null, patternIndex: idx });
+                            });
+                        }
+                        gltf.scene.traverse((child) => {
+                            if (child.isMesh && child.name === 'paint_point') {
+                                const p = child.clone(); scene.add(p); paintPoints.push(p);
+                            }
+                        });
+                        hideLoading();
+                        showStatus(`✅ 加载: ${work.title}，纹样 ${decals.length} 个`, 3000);
+                        currentModelName = work.model || '加载的模型';
+                    }, (err) => {
+                        console.error('GLB解析失败', err);
+                        hideLoading();
+                        loadSampleModel('vase');
+                        if (work.decalData) {
+                            setTimeout(() => {
+                                work.decalData.forEach((info) => {
+                                    const idx = info.patternIndex || 0;
+                                    const tex = patternTextures[idx];
+                                    const geo = new THREE.PlaneGeometry(8, 8);
+                                    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false, depthTest: true, opacity: 0.9, color: 0xffffff, premultipliedAlpha: true });
+                                    const mesh = new THREE.Mesh(geo, mat);
+                                    mesh.name = 'decal';
+                                    if (info.position) mesh.position.fromArray(info.position);
+                                    if (info.rotation) mesh.rotation.set(info.rotation[0], info.rotation[1], info.rotation[2]);
+                                    if (info.scale) mesh.scale.set(info.scale, info.scale, info.scale);
+                                    scene.add(mesh);
+                                    decals.push({ mesh, outline: null, patternIndex: idx });
+                                });
+                                showStatus(`✅ 恢复 ${decals.length} 个纹样`, 3000);
+                            }, 500);
+                        }
+                    });
+                } catch (e) {
+                    hideLoading();
+                    loadSampleModel('vase');
+                    showStatus('⚠️ 模型加载失败，使用示例', 3000);
+                }
+            } else {
+                loadSampleModel('vase');
+                if (work.decalData) {
+                    setTimeout(() => {
+                        work.decalData.forEach((info) => {
+                            const idx = info.patternIndex || 0;
+                            const tex = patternTextures[idx];
+                            const geo = new THREE.PlaneGeometry(8, 8);
+                            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide, depthWrite: false, depthTest: true, opacity: 0.9, color: 0xffffff, premultipliedAlpha: true });
+                            const mesh = new THREE.Mesh(geo, mat);
+                            mesh.name = 'decal';
+                            if (info.position) mesh.position.fromArray(info.position);
+                            if (info.rotation) mesh.rotation.set(info.rotation[0], info.rotation[1], info.rotation[2]);
+                            if (info.scale) mesh.scale.set(info.scale, info.scale, info.scale);
+                            scene.add(mesh);
+                            decals.push({ mesh, outline: null, patternIndex: idx });
+                        });
+                        hideLoading();
+                        showStatus(`✅ 恢复 ${decals.length} 个纹样`, 3000);
+                    }, 500);
+                } else { hideLoading(); }
+            }
+        }
+
+        async function loadWorkForEdit() {
+            const params = new URLSearchParams(window.location.search);
+            const editId = params.get('edit');
+            if (!editId) return;
+            const id = parseInt(editId);
+            if (isNaN(id)) return;
+            isEditMode = true;
+            editingWorkId = id;
+            showLoading('📥 加载作品...');
+            try {
+                const work = await getWorkFromIndexedDB(id);
+                if (!work) { hideLoading(); showStatus('⚠️ 作品不存在', 3000); return; }
+                document.getElementById('editTitle').textContent = work.title || '未命名';
+                document.getElementById('editBanner').classList.add('show');
+                document.title = `✏️ 编辑: ${work.title || '未命名'} - 青韵工坊`;
+                restoreSceneFromData(work);
+            } catch (e) {
+                hideLoading();
+                showStatus('❌ 加载失败', 3000);
+                loadSampleModel('vase');
+            }
+        }
+
+        // ========== 对话框：展示词语与意思 ==========
+        const modelMeanings = {
+            '玉壶春瓶': '🌸 玉壶春瓶：造型端庄，线条流畅，寓意“玉壶冰心”。',
+            '梅瓶': '🌺 梅瓶：小口短颈，丰肩修腹，清雅傲骨。',
+            '敞口碗': '🍵 敞口碗：口沿外撇，深腹圆足，实用与美学兼具。',
+            '青花盘': '🍽️ 青花盘：圆润宽阔，青花白釉，经典雅致。'
+        };
+        const patternMeanings = {
+            '花卉纹': '🌸 花卉纹：寓意富贵吉祥，柔美婉约。',
+            '回（雷）纹': '🔲 回纹：连绵不断，富贵不断头。',
+            '祥云纹': '☁️ 祥云纹：象征吉祥如意、高升。',
+            '缠枝莲纹': '🌿 缠枝莲纹：枝蔓缠绕，莲纹连绵，生生不息。',
+            '山纹': '⛰️ 山纹：取山水之意，象征稳重、长久与自然和谐。',
+            '福字纹': '🧧 福字纹：祈愿幸福安康。',
+            '双鱼纹': '🐟 双鱼纹：年年有余，和谐美满。'
+        };
+
+        function updateMeaning(type, keyOrIdx) {
+            const box = document.getElementById('meaningBox');
+            if (type === 'model') {
+                box.textContent = modelMeanings[keyOrIdx] || '🏺 经典青花器型。';
+            } else {
+                const names = ['花卉纹','回（雷）纹','祥云纹','缠枝莲纹','山纹','福字纹','双鱼纹'];
+                const key = names[keyOrIdx] || '花卉纹';
+                box.textContent = patternMeanings[key] || '🌸 经典青花纹样。';
+            }
+            box.className = 'meaning-box';
+        }
+
+        // 模型标签点击
+        document.querySelectorAll('#modelRow .tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                document.querySelectorAll('#modelRow .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const key = this.dataset.key;
+                updateMeaning('model', key);
+                const map = { '玉壶春瓶':'vase', '梅瓶':'meiping', '敞口碗':'bowl', '青花盘':'plate' };
+                if (map[key]) loadSampleModel(map[key]);
+            });
+        });
+
+        // 纹样标签点击
+        document.querySelectorAll('#patternRow .tag').forEach((tag, idx) => {
+            tag.addEventListener('click', function() {
+                document.querySelectorAll('#patternRow .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                const names = ['花卉纹','回（雷）纹','祥云纹','缠枝莲纹','山纹','福字纹','双鱼纹'];
+                const found = names.indexOf(this.dataset.key);
+                if (found >= 0) {
+                    selectedPatternIndex = found;
+                    document.querySelectorAll('.pattern-item').forEach((el, i) => el.classList.toggle('selected', i === found));
+                    updateMeaning('pattern', found);
+                    switchMode('place');
+                }
+            });
+        });
+
+        // 关闭对话框
+        document.getElementById('closeDialogBtn').addEventListener('click', function() {
+            document.getElementById('dialogBox').style.display = 'none';
+        });
+
+        // 点击图片可更换
+        document.getElementById('bottomImage').addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = document.getElementById('bottomImg');
+                    img.src = ev.target.result;
+                    img.style.display = 'block';
+                    document.getElementById('imgPlaceholder').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        });
+
+        // 默认展示花卉纹意思
+        updateMeaning('pattern', 0);
+
+        // ========== 窗口自适应 ==========
+        function resizeRenderer() {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
+        window.addEventListener('resize', resizeRenderer);
+
+        // ========== 动画 ==========
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // ========== 暴露API ==========
+        window.__qingyun = {
+            getWorks: async () => {
+                const db = await openDB();
+                const tx = db.transaction(['works'], 'readonly');
+                const store = tx.objectStore('works');
+                const works = await new Promise((r) => { const req = store.getAll(); req.onsuccess = () => r(req.result); req.onerror = () => r([]); });
+                db.close();
+                return works.sort((a, b) => b.id - a.id);
+            },
+            deleteWork: async (id) => {
+                const db = await openDB();
+                const tx = db.transaction(['works'], 'readwrite');
+                const store = tx.objectStore('works');
+                store.delete(id);
+                await new Promise((r) => { tx.oncomplete = r; });
+                db.close();
+            },
+            exportGLB
+        };
+
+        setTimeout(() => { loadWorkForEdit(); }, 300);
+        setTimeout(() => { if (!vaseMesh && !isEditMode) loadSampleModel('vase'); }, 800);
+        showStatus('👆 选择模型或上传STL | Ctrl+S 保存', 4000);
+        console.log('🎯 青韵工坊启动，龙纹已替换为山纹。');
+    </script>
+</body>
+</html>

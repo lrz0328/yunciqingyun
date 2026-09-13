@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>青韵工坊 · 创作平台</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+      background: #f5f3f0;
+      color: #1e1e2a;
+      line-height: 1.6;
+      padding-top: 70px;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* 导航 */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: rgba(26, 26, 46, 0.92);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      z-index: 1000;
+      border-bottom: 2px solid #003366;
+      box-shadow: 0 2px 10px rgba(0, 51, 102, 0.2);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #e6f0ff;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: #003366;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "KaiTi", serif;
+      font-size: 20px;
+      color: #fff;
+    }
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.8);
+      font-size: 16px;
+      font-weight: 500;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: #fff;
+    }
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #3498db;
+    }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255,255,255,0.8);
+    }
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      background: #2a2a4a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #444;
+      color: #fff;
+    }
+
+    /* ===== 轮播图 ===== */
+    .carousel-wrapper {
+      max-width: 1280px;
+      margin: 0 auto 30px;
+      padding: 0 30px;
+    }
+    .carousel {
+      position: relative;
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      background: #1a1a2e;
+    }
+    .carousel-slides {
+      display: flex;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 50px;
+      background: linear-gradient(145deg, #1a2a3e, #2a3a4e);
+      color: #f0f4fa;
+      min-height: 280px;
+    }
+    .carousel-slide:nth-child(2) {
+      background: linear-gradient(145deg, #2a3a2e, #1a2a2e);
+    }
+    .carousel-slide:nth-child(3) {
+      background: linear-gradient(145deg, #3a2a2e, #2a1a2e);
+    }
+    .carousel-slide .text {
+      flex: 1 1 55%;
+    }
+    .carousel-slide .text h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .carousel-slide .text p {
+      font-size: 17px;
+      opacity: 0.85;
+      margin-bottom: 18px;
+      max-width: 500px;
+      line-height: 1.7;
+    }
+    .carousel-slide .text .btn-group {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .carousel-slide .text .btn {
+      display: inline-block;
+      padding: 10px 28px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.3s;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      cursor: pointer;
+    }
+    .carousel-slide .text .btn.primary {
+      background: #3498db;
+      border-color: #3498db;
+    }
+    .carousel-slide .text .btn.primary:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(52,152,219,0.3);
+    }
+    .carousel-slide .text .btn.outline:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    .carousel-slide .emoji-big {
+      flex: 0 0 120px;
+      font-size: 100px;
+      text-align: center;
+      opacity: 0.7;
+      filter: drop-shadow(0 8px 20px rgba(0,0,0,0.2));
+    }
+
+    /* 轮播控制 */
+    .carousel-controls {
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    .carousel-controls button {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(6px);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .carousel-controls button:hover {
+      background: rgba(255,255,255,0.25);
+    }
+    .carousel-dots {
+      position: absolute;
+      bottom: 28px;
+      left: 30px;
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+    .carousel-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .carousel-dots span.active {
+      background: #3498db;
+      width: 28px;
+      border-radius: 6px;
+    }
+
+    /* 主容器 */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 30px 60px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin: 20px 0 40px;
+    }
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #1a2a3a;
+      letter-spacing: 2px;
+    }
+    .page-header h1 span {
+      color: #1a4b8c;
+    }
+    .page-header .sub {
+      font-size: 17px;
+      color: #4a5a6a;
+      margin-top: 6px;
+      border-bottom: 2px solid #d0c8bc;
+      display: inline-block;
+      padding-bottom: 6px;
+    }
+
+    /* 说明书网格 */
+    .doc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 12px;
+    }
+    .doc-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 32px 30px 36px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+      border: 1px solid rgba(0, 0, 0, 0.03);
+      transition: transform 0.2s ease, box-shadow 0.25s;
+    }
+    .doc-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(26, 26, 46, 0.10);
+    }
+    .doc-card .card-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .doc-card h2 {
+      font-size: 24px;
+      font-weight: 650;
+      color: #1a2a3a;
+      margin-bottom: 14px;
+      border-left: 6px solid #1a4b8c;
+      padding-left: 16px;
+    }
+    .doc-card p,
+    .doc-card li {
+      color: #2e3e4e;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    .doc-card ul {
+      list-style: none;
+      padding-left: 6px;
+      margin-top: 10px;
+    }
+    .doc-card ul li {
+      padding: 6px 0 6px 28px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%231a4b8c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>') left center no-repeat;
+      background-size: 18px;
+    }
+    .doc-card ul li strong {
+      color: #0f2b4a;
+      font-weight: 600;
+    }
+    .doc-card .highlight {
+      background: #eef4fa;
+      padding: 14px 18px;
+      border-radius: 18px;
+      margin: 16px 0 6px;
+      border-left: 4px solid #1a4b8c;
+      font-size: 15px;
+    }
+    .doc-card .badge {
+      display: inline-block;
+      background: #1a4b8c;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 0 14px;
+      border-radius: 30px;
+      line-height: 28px;
+      margin-right: 6px;
+    }
+    .doc-card .badge.green {
+      background: #2a7a5a;
+    }
+    .doc-card .badge.orange {
+      background: #b45f2a;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* ===== 数字青花瓷 · 关键字寓意 (可点击) ===== */
+    .digital-section {
+      margin-top: 48px;
+      background: #e8e4de;
+      border-radius: 32px;
+      padding: 36px 40px 44px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .digital-section h2 {
+      font-size: 28px;
+      font-weight: 650;
+      color: #1a2a3a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .digital-section h2 small {
+      font-size: 16px;
+      font-weight: 400;
+      color: #4a5a6a;
+      margin-left: 8px;
+    }
+    .keyword-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      margin: 18px 0 12px;
+    }
+    .keyword-item {
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      padding: 8px 22px;
+      border-radius: 60px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #1a2a3a;
+      border: 1px solid rgba(26, 26, 46, 0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: all 0.2s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .keyword-item:hover {
+      background: #ffffff;
+      border-color: #1a4b8c;
+      box-shadow: 0 6px 16px rgba(26, 75, 140, 0.12);
+      transform: translateY(-2px);
+    }
+    .keyword-item.active {
+      background: #1a4b8c;
+      color: #fff;
+      border-color: #1a4b8c;
+      box-shadow: 0 6px 20px rgba(26, 75, 140, 0.25);
+    }
+    .keyword-item .emoji {
+      margin-right: 6px;
+    }
+
+    .meaning-preview {
+      background: #ffffffcc;
+      backdrop-filter: blur(4px);
+      border-radius: 24px;
+      padding: 20px 28px;
+      margin-top: 18px;
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.02);
+      transition: all 0.3s;
+      min-height: 70px;
+    }
+    .meaning-preview .label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #4a5a6a;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .meaning-preview .content {
+      font-size: 18px;
+      color: #1a2a3a;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .meaning-preview .content small {
+      font-weight: 400;
+      color: #4a5a6a;
+      font-size: 15px;
+      margin-left: 10px;
+    }
+
+    .footer-note {
+      margin-top: 50px;
+      text-align: center;
+      font-size: 14px;
+      color: #6a7a8a;
+      border-top: 1px solid #d8d0c8;
+      padding-top: 28px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 860px) {
+      .doc-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .navbar {
+        padding: 0 20px;
+      }
+      .nav-links {
+        gap: 16px;
+      }
+      .nav-links a {
+        font-size: 14px;
+      }
+      .carousel-wrapper {
+        padding: 0 16px;
+      }
+      .carousel-slide {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 24px;
+        min-height: 240px;
+      }
+      .carousel-slide .text {
+        flex: 1 1 auto;
+      }
+      .carousel-slide .text h2 {
+        font-size: 26px;
+      }
+      .carousel-slide .text p {
+        max-width: 100%;
+        font-size: 15px;
+      }
+      .carousel-slide .text .btn-group {
+        justify-content: center;
+      }
+      .carousel-slide .emoji-big {
+        flex: 0 0 60px;
+        font-size: 60px;
+        margin-top: 8px;
+      }
+      .carousel-controls {
+        right: 16px;
+        bottom: 16px;
+      }
+      .carousel-dots {
+        left: 16px;
+        bottom: 22px;
+      }
+      .container {
+        padding: 0 16px 40px;
+      }
+      .page-header h1 {
+        font-size: 30px;
+      }
+      .digital-section {
+        padding: 24px 20px 30px;
+      }
+      .keyword-grid {
+        gap: 10px 12px;
+      }
+      .keyword-item {
+        padding: 6px 16px;
+        font-size: 14px;
+      }
+    }
+    @media (max-width: 480px) {
+      .nav-logo span {
+        display: none;
+      }
+      .nav-links a {
+        font-size: 12px;
+      }
+      .doc-card {
+        padding: 22px 18px;
+      }
+      .doc-card h2 {
+        font-size: 20px;
+        padding-left: 12px;
+      }
+      .digital-section h2 {
+        font-size: 22px;
+        flex-wrap: wrap;
+      }
+      .meaning-preview .content {
+        font-size: 16px;
+      }
+      .carousel-slide .text h2 {
+        font-size: 22px;
+      }
+      .carousel-slide .text .btn {
+        padding: 8px 18px;
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 导航 -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      <div class="logo-icon">青</div>
+      <span>青韵工坊</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">首页</a></li>
+      <li><a href="create.html">开始创作</a></li>
+      <li><a href="ranking.html">排行榜</a></li>
+      <li><a href="profile.html">个人中心</a></li>
+    </ul>
+    <div class="nav-user">
+      <span>游客</span>
+      <div class="nav-avatar">👤</div>
+    </div>
+  </nav>
+
+  <!-- ===== 轮播图 ===== -->
+  <div class="carousel-wrapper">
+    <div class="carousel" id="carousel">
+      <div class="carousel-slides" id="carouselSlides">
+        <!-- 第一屏 -->
+        <div class="carousel-slide">
+          <div class="text">
+            <h2>🏺 开始你的青花创作</h2>
+            <p>选用平台经典器型，或上传自建 STL 模型，自由贴附纹样、手绘青花，打造专属数字艺术品。</p>
+            <div class="btn-group">
+              <a href="create.html" class="btn primary">🚀 开始创作</a>
+              <a href="ranking.html" class="btn outline">🏆 排行榜</a>
+            </div>
+          </div>
+          <div class="emoji-big">🎨</div>
+        </div>
+        <!-- 第二屏 -->
+        <div class="carousel-slide">
+          <div class="text">
+            <h2>🏆 创意排行榜</h2>
+            <p>欣赏社区优秀作品，为心仪的创作点赞。你的作品也有机会登上榜单，被更多人看见。</p>
+            <div class="btn-group">
+              <a href="ranking.html" class="btn primary">🔥 去看看</a>
+              <a href="create.html" class="btn outline">✏️ 去创作</a>
+            </div>
+          </div>
+          <div class="emoji-big">🏅</div>
+        </div>
+        <!-- 第三屏 -->
+        <div class="carousel-slide">
+          <div class="text">
+            <h2>📖 纹样 · 寓意</h2>
+            <p>花卉、回纹、祥云、缠枝莲、龙纹、福字、双鱼…… 点击下方关键字，了解每一笔纹样的文化故事。</p>
+            <div class="btn-group">
+              <a href="#digital-section" class="btn primary" onclick="document.getElementById('digital-section').scrollIntoView({behavior:'smooth'}); return false;">🔍 探索寓意</a>
+              <a href="create.html" class="btn outline">🎨 去贴纹样</a>
+            </div>
+          </div>
+          <div class="emoji-big">📜</div>
+        </div>
+      </div>
+
+      <!-- 控制按钮 -->
+      <div class="carousel-controls">
+        <button id="carouselPrev" aria-label="上一张">‹</button>
+        <button id="carouselNext" aria-label="下一张">›</button>
+      </div>
+      <div class="carousel-dots" id="carouselDots">
+        <span class="active" data-index="0"></span>
+        <span data-index="1"></span>
+        <span data-index="2"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 主内容 ===== -->
+  <div class="container">
+
+    <div class="page-header">
+      <h1>📖 青韵工坊 · <span>创作平台</span></h1>
+      <div class="sub">从模型到纹样，一站式数字青花瓷创作指南</div>
+    </div>
+
+    <!-- 说明书网格 -->
+    <div class="doc-grid">
+
+      <!-- 模型创作说明 -->
+      <div class="doc-card">
+        <span class="card-icon">🏺</span>
+        <h2>模型创作说明</h2>
+        <p><strong>两种方式，轻松获得专属模型：</strong></p>
+        <ul>
+          <li><strong>方法一 · 平台精选模型</strong><br>直接使用平台提供的四种经典器型：<span class="badge">玉壶春瓶</span><span class="badge">敞口碗</span><span class="badge">青花盘</span><span class="badge">梅瓶</span>，即刻开始创作。</li>
+          <li><strong>方法二 · 自定义上传</strong><br>前往 <strong>腾讯云</strong> 注册账号，每日可享免费额度，从文字描述或图片生成 3D 模型（支持 STL 格式）。下载后，在平台「开始创作」页面点击 <span class="badge green">📂 上传STL</span>，即可导入自己的模型。</li>
+        </ul>
+        <div class="highlight">
+          💡 <strong>提示：</strong> 腾讯云 AI 3D 生成每天有免费次数，建议先规划好创意再生成，避免浪费额度。
+        </div>
+      </div>
+
+      <!-- 纹样创作说明 -->
+      <div class="doc-card">
+        <span class="card-icon">🎨</span>
+        <h2>纹样创作说明</h2>
+        <p>平台提供 <strong>丰富的青花纹样库</strong> 和 <strong>自由画笔工具</strong>，满足您的个性化需求：</p>
+        <ul>
+          <li><strong>纹样库</strong> — 花卉纹、回纹、祥云纹、缠枝莲纹、龙纹、福字纹、双鱼纹…… 一键贴附，即刻呈现。</li>
+          <li><strong>画笔工具</strong> — 支持多种颜色与笔触大小，您可以在模型表面自由绘制，创作独一无二的青花笔意。</li>
+        </ul>
+        <div class="highlight" style="margin-top: 12px;">
+          🖌️ <strong>随心组合：</strong> 纹样与画笔可叠加使用，先贴纹样，再手绘点缀，让作品更具层次感。
+        </div>
+      </div>
+
+      <!-- 数字青花瓷 · 关键字寓意 (全宽，可点击) -->
+      <div class="doc-card full-width" style="background: #f2efe8;" id="digital-section">
+        <span class="card-icon">🔍</span>
+        <h2>数字青花瓷 · 关键字寓意</h2>
+        <p style="margin-bottom: 6px;">在「开始创作」界面中，点击下方关键字，即可同步查看对应 <strong>器皿</strong> 与 <strong>纹样</strong> 的文化寓意：</p>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 18px 28px; margin: 16px 0 6px;">
+          <div><span class="badge" style="background: #1a4b8c;">器皿</span> 玉壶春瓶 · 梅瓶 · 敞口碗 · 青花盘</div>
+          <div><span class="badge orange" style="background: #b45f2a;">纹样</span> 花卉纹 · 回纹 · 祥云纹 · 缠枝莲纹 · 龙纹 · 福字纹 · 双鱼纹</div>
+        </div>
+
+        <!-- 可点击的关键字 -->
+        <div class="keyword-grid" id="keywordGrid">
+          <span class="keyword-item active" data-key="花卉纹_玉壶春瓶"><span class="emoji">🌸</span>花卉纹 · 玉壶春瓶</span>
+          <span class="keyword-item" data-key="回纹_梅瓶"><span class="emoji">🔲</span>回纹 · 梅瓶</span>
+          <span class="keyword-item" data-key="祥云纹_敞口碗"><span class="emoji">☁️</span>祥云纹 · 敞口碗</span>
+          <span class="keyword-item" data-key="缠枝莲纹_青花盘"><span class="emoji">🌿</span>缠枝莲纹 · 青花盘</span>
+          <span class="keyword-item" data-key="龙纹_玉壶春瓶"><span class="emoji">🐉</span>龙纹 · 玉壶春瓶</span>
+          <span class="keyword-item" data-key="福字纹_梅瓶"><span class="emoji">🧧</span>福字纹 · 梅瓶</span>
+          <span class="keyword-item" data-key="双鱼纹_敞口碗"><span class="emoji">🐟</span>双鱼纹 · 敞口碗</span>
+        </div>
+
+        <!-- 寓意展示 -->
+        <div class="meaning-preview" id="meaningPreview">
+          <div class="label">📖 当前寓意</div>
+          <div class="content" id="meaningContent">
+            🌸 花卉纹 · 玉壶春瓶
+            <small>寓意富贵吉祥，柔美婉约，器型端庄如“玉壶冰心”。</small>
+          </div>
+        </div>
+        <p style="font-size: 14px; color: #4a5a6a; margin-top: 12px;">
+          ⚡ 在创作页面点击任意关键字，右侧纹样面板与左下角对话框将同步更新，助您了解每一笔纹样背后的文化故事。
+        </p>
+      </div>
+    </div>
+
+    <!-- 额外说明 -->
+    <div style="margin-top: 36px; background: #e2e0da; border-radius: 30px; padding: 24px 32px; border: 1px solid rgba(255,255,255,0.3);">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px 30px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 28px;">🖥️</span>
+          <span style="font-weight: 600; font-size: 18px; color: #1a2a3a;">开始创作界面</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px 18px; color: #2e3e4e;">
+          <span>✅ 左侧图片 + 对话框展示寓意</span>
+          <span>✅ 右侧纹样面板一键贴花</span>
+          <span>✅ 画笔工具自由绘制</span>
+          <span>✅ 保存作品至个人中心</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      🏺 青韵工坊 · 传承数字青花之美 · 让创作更有温度
+    </div>
+  </div>
+
+  <!-- ===== 轮播图脚本 ===== -->
+  <script>
+    (function() {
+      const slides = document.getElementById('carouselSlides');
+      const dots = document.querySelectorAll('#carouselDots span');
+      const prevBtn = document.getElementById('carouselPrev');
+      const nextBtn = document.getElementById('carouselNext');
+      let current = 0;
+      const total = 3;
+
+      function goTo(index) {
+        if (index < 0) index = total - 1;
+        if (index >= total) index = 0;
+        current = index;
+        slides.style.transform = `translateX(-${current * 100}%)`;
+        dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === current);
+        });
+      }
+
+      prevBtn.addEventListener('click', () => goTo(current - 1));
+      nextBtn.addEventListener('click', () => goTo(current + 1));
+      dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goTo(i));
+      });
+
+      // 自动播放
+      let autoTimer = setInterval(() => goTo(current + 1), 5000);
+      const carousel = document.getElementById('carousel');
+      carousel.addEventListener('mouseenter', () => clearInterval(autoTimer));
+      carousel.addEventListener('mouseleave', () => {
+        clearInterval(autoTimer);
+        autoTimer = setInterval(() => goTo(current + 1), 5000);
+      });
+    })();
+
+    // ===== 关键字点击 =====
+    (function() {
+      const keywordMap = {
+        '花卉纹_玉壶春瓶': {
+          emoji: '🌸',
+          text: '花卉纹 · 玉壶春瓶',
+          desc: '寓意富贵吉祥，柔美婉约，器型端庄如“玉壶冰心”。'
+        },
+        '回纹_梅瓶': {
+          emoji: '🔲',
+          text: '回纹 · 梅瓶',
+          desc: '连绵不断，富贵不断头，梅瓶清雅傲骨。'
+        },
+        '祥云纹_敞口碗': {
+          emoji: '☁️',
+          text: '祥云纹 · 敞口碗',
+          desc: '象征吉祥如意、高升，敞口碗实用与美学兼具。'
+        },
+        '缠枝莲纹_青花盘': {
+          emoji: '🌿',
+          text: '缠枝莲纹 · 青花盘',
+          desc: '枝蔓缠绕，生生不息，青花盘圆润典雅。'
+        },
+        '龙纹_玉壶春瓶': {
+          emoji: '🐉',
+          text: '龙纹 · 玉壶春瓶',
+          desc: '权势与尊贵的象征，玉壶春瓶线条流畅。'
+        },
+        '福字纹_梅瓶': {
+          emoji: '🧧',
+          text: '福字纹 · 梅瓶',
+          desc: '祈愿幸福安康，梅瓶小口短颈，丰肩修腹。'
+        },
+        '双鱼纹_敞口碗': {
+          emoji: '🐟',
+          text: '双鱼纹 · 敞口碗',
+          desc: '年年有余，和谐美满，敞口碗深腹圆足。'
+        }
+      };
+
+      const items = document.querySelectorAll('.keyword-item');
+      const contentEl = document.getElementById('meaningContent');
+
+      items.forEach(item => {
+        item.addEventListener('click', function() {
+          // 高亮
+          items.forEach(el => el.classList.remove('active'));
+          this.classList.add('active');
+
+          const key = this.dataset.key;
+          const data = keywordMap[key];
+          if (data) {
+            contentEl.innerHTML = `${data.emoji} ${data.text} <small>${data.desc}</small>`;
+          } else {
+            // fallback
+            const parts = key.split('_');
+            contentEl.innerHTML = `🏺 ${parts[0] || '纹样'} · ${parts[1] || '器皿'} <small>经典青花韵味。</small>`;
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
