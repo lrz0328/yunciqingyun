@@ -870,7 +870,7 @@
         }
 
         function loadSampleModel(modelName) {
-            const url = `/models/${modelName}.stl`;
+            const url = `models/${modelName}.stl`;
             showStatus(`⏳ 加载 ${modelName} ...`, 0);
             document.querySelectorAll('.sample-btn').forEach(b => b.classList.add('loading'));
             fetch(url).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.arrayBuffer(); })
